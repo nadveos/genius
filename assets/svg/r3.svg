@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 150 230" xmlns="http://www.w3.org/2000/svg">
+  <polygon style="fill: rgb(186, 225, 255);" points="0 0 0 230 70 0 "/>
+  <polygon style="fill: rgb(80, 175, 255);" points="0 0 0 120 110 0 "/>
+  <polygon style="fill: rgb(186, 225, 255);" points="40 0 120 60 150 0 "/>
+</svg>
