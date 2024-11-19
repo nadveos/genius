@@ -24,10 +24,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _direccionController = TextEditingController();
+
   final TextEditingController _empresaController = TextEditingController();
+  final TextEditingController _posicionController = TextEditingController();
   final TextEditingController _desdeController = TextEditingController();
   final TextEditingController _hastaController = TextEditingController();
-  final TextEditingController _posicionController = TextEditingController();
   final TextEditingController _posicionDescController = TextEditingController();
 
   final TextEditingController _tituloSecundarioController =
@@ -38,10 +39,12 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   final TextEditingController _startStudyController = TextEditingController();
   final TextEditingController _endStudyController = TextEditingController();
+  final List<Map<String, dynamic>> _educacion = [];
+
+
   final TextEditingController _conocimientoController = TextEditingController();
 
   final List<Map<String, dynamic>> _experiencias = [];
-  final List<Map<String, dynamic>> _educacion = [];
   final List<Map<String, String>> _conocimientos = [];
 
   String _nivelSecundario = 'Secundario Completo';
@@ -133,7 +136,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           key: _formKeys[0],
           child: TextFormField(
             controller: _nombreController,
-            decoration: const InputDecoration(labelText: 'Nombre Completo'),
+            decoration: const InputDecoration(
+            hintText: 'Ej.: Juan Pérez',
+            labelText: 'Nombre Completo'),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Por favor ingrese su nombre';
@@ -187,7 +192,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: TextFormField(
             controller: _telefonoController,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Telefono'),
+            decoration: const InputDecoration(
+            hintText: 'Ej.: 3874111222',
+            labelText: 'Telefono'),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Por favor ingrese su telefono';
@@ -204,7 +211,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           key: _formKeys[4],
           child: TextFormField(
             controller: _direccionController,
-            decoration: const InputDecoration(labelText: 'Direccion'),
+            decoration: const InputDecoration(
+            hintText: 'Ej.: Av. San Martín 123, Salta',
+            labelText: 'Direccion'),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Por favor ingrese su direccion';
@@ -407,26 +416,16 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     Row(
                       children: [
                         const Text('Posee título:'),
-                        Radio<bool>(
-                          value: true,
-                          groupValue: _poseeTituloSecundario,
+                        Switch(
+                          activeColor: Colors.green,
+
+                          value: _poseeTituloSecundario,
                           onChanged: (value) {
                             setState(() {
-                              _poseeTituloSecundario = value!;
+                              _poseeTituloSecundario = value;
                             });
                           },
                         ),
-                        const Text('Sí'),
-                        Radio<bool>(
-                          value: false,
-                          groupValue: _poseeTituloSecundario,
-                          onChanged: (value) {
-                            setState(() {
-                              _poseeTituloSecundario = value!;
-                            });
-                          },
-                        ),
-                        const Text('No'),
                       ],
                     ),
                   ],

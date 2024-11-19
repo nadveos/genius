@@ -18,6 +18,9 @@ class _PageViewFormState extends ConsumerState<PageViewForm> {
     const PersonalData1(),
     const PersonalData2(),
     const PersonalData3(),
+    const ExperienceJobsData(),
+    const EducationData(),
+    
    
   ];
   bool _isCurrentStepValid() {
@@ -30,6 +33,10 @@ class _PageViewFormState extends ConsumerState<PageViewForm> {
         return userCv.phoneNumber.isNotEmpty && userCv.email.isNotEmpty;
       case 2:
         return userCv.nationality.isNotEmpty && userCv.address.isNotEmpty;
+      case 3:
+        return userCv.experiences.isNotEmpty;
+      case 4:
+        return userCv.studies.isNotEmpty;
       default:
         return true;
     }

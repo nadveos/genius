@@ -108,6 +108,7 @@ class UserCvNotifier extends StateNotifier<UserCv> {
       photoUrl: state.photoUrl,
       nationality: nationality,
     );
+ 
   }
 
   // Método para actualizar la foto
@@ -126,6 +127,7 @@ class UserCvNotifier extends StateNotifier<UserCv> {
   // Agregar experiencia
   void addExperience(Experience experience) {
     state.experiences.add(experience);
+    print(experience);
   }
 
   // Agregar estudio
