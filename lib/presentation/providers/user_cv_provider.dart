@@ -127,7 +127,7 @@ class UserCvNotifier extends StateNotifier<UserCv> {
   // Agregar experiencia
   void addExperience(Experience experience) {
     state.experiences.add(experience);
-    print(experience);
+   
   }
 
   // Agregar estudio

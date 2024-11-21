@@ -15,6 +15,7 @@ class UserCv {
   final IsarLinks<Experience> experiences = IsarLinks<Experience>();
   final IsarLinks<Study> studies = IsarLinks<Study>();
   final IsarLinks<Skill> skills = IsarLinks<Skill>();
+  final IsarLinks<HighStudy> highStudies = IsarLinks<HighStudy>();
 
   UserCv({
     required this.name,
@@ -46,7 +47,15 @@ class Study {
   late String endDate;
   late bool isGraduated;
 }
-
+@collection
+class HighStudy{
+  Id id = Isar.autoIncrement;
+  late String institutionName;
+  late String degree;
+  late String startDate;
+  late String endDate;
+  late bool isGraduated;
+}
 @collection
 class Skill {
   Id id = Isar.autoIncrement;

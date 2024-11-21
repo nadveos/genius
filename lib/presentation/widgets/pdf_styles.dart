@@ -17,15 +17,29 @@ Future<List<String>> loadSvgAssets() async {
       .toList();
 }
 
-class ThemePreview extends ConsumerWidget {
+class ThemePreview extends ConsumerStatefulWidget {
   const ThemePreview({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ThemePreview> createState() => _ThemePreviewState();
+}
+
+class _ThemePreviewState extends ConsumerState<ThemePreview> {
+  late Future<List<String>> _svgFilesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _svgFilesFuture = loadSvgAssets(); // Cacheamos los SVG
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedTheme = ref.watch(selectedThemeProvider);
+    final controller = ScrollController();
 
     return FutureBuilder<List<String>>(
-      future: loadSvgAssets(), // Cargar los archivos SVG
+      future: _svgFilesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -37,40 +51,51 @@ class ThemePreview extends ConsumerWidget {
 
         final svgFiles = snapshot.data ?? [];
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(8),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-          ),
-          itemCount: svgFiles.length,
-          itemBuilder: (context, index) {
-            final svgFile = svgFiles[index];
-            return GestureDetector(
-              onTap: () {
-                ref.read(selectedThemeProvider.notifier).state = index;
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: selectedTheme == index ? Colors.black.withOpacity(0.25) : Colors.white,
-                  border: Border.all(
-                    color: selectedTheme == index ? Colors.blue : Colors.grey,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    svgFile,  // Aquí cargamos el archivo SVG
-                    width: 100,  // Ajusta el tamaño según sea necesario
-                    height: 100, // Ajusta el tamaño según sea necesario
-                  ),
-                ),
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                controller: controller,
+                padding: const EdgeInsets.all(8),
+                scrollDirection: Axis.horizontal,
+                itemCount: svgFiles.length,
+                itemBuilder: (context, index) {
+                  final svgFile = svgFiles[index];
+                  final isSelected = selectedTheme == index;
+
+                  return GestureDetector(
+                    onTap: () {
+                      ref.read(selectedThemeProvider.notifier).selectTheme(index);
+                      // ignore: avoid_print
+                      print('Seleccionado: $index, Archivo: $svgFile');
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.black.withOpacity(0.25)
+                            : Colors.white,
+                        border: Border.all(
+                          color: isSelected ? Colors.blue : Colors.grey,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          svgFile,
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+            
+          ],
         );
       },
     );

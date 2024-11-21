@@ -10,4 +10,13 @@ final isarUserProvider = Provider<UserCvDataSourceImpl>((ref) {
   final isarUserService = ref.read(isarUserProvider);
   return isarUserService.getAllCvs();
 });
-final selectedThemeProvider = StateProvider<int>((ref) => 0);
+class SelectedThemeNotifier extends StateNotifier<int> {
+  SelectedThemeNotifier() : super(0);
+
+  void selectTheme(int index) => state = index;
+}
+
+final selectedThemeProvider = StateNotifierProvider<SelectedThemeNotifier, int>(
+  (ref) => SelectedThemeNotifier(),
+);
+

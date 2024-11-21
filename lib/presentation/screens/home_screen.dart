@@ -12,6 +12,17 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userCvAsyncValue = ref.watch(isarRealUserProvider);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis CVs'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              context.push('/create-cv');
+            },
+          ),
+        ],
+      ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     context.push('/create-cv');

@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
+// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison, avoid_print
 
 import 'dart:io';
 import 'dart:math';
@@ -27,14 +27,18 @@ class CvDataScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dataCv = ref.watch(isarUserProvider);
     final cv = dataCv.getUserCv(userId);
-    final selectedTheme = ref.watch(selectedThemeProvider);
+    final selectedTheme = ref.read(selectedThemeProvider);
     // Crear una variable para la decoración del tema
 
     Future<String> generatePdf(
         UserCv userCv, int themeIndex, PdfPageFormat format) async {
       final pdf = pw.Document(title: userCv.name, author: 'CVGenius');
 
-      final pageTheme = await _myPageTheme(format, themeIndex);
+      final selectedTheme =
+          ref.read(selectedThemeProvider); // Obtén el índice actual
+
+      final pageTheme =
+          await _myPageTheme(format, selectedTheme); // Pasa el índice
       pdf.addPage(
         pw.MultiPage(
           pageTheme: pageTheme,
@@ -57,15 +61,6 @@ class CvDataScreen extends ConsumerWidget {
                                     .copyWith(fontWeight: pw.FontWeight.bold)),
                             pw.Padding(
                                 padding: const pw.EdgeInsets.only(top: 10)),
-                            pw.Text(
-                              'Electrotyper',
-                              textScaleFactor: 1.2,
-                              style: pw.Theme.of(context)
-                                  .defaultTextStyle
-                                  .copyWith(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: PdfColors.blue900),
-                            ),
                             pw.Padding(
                                 padding: const pw.EdgeInsets.only(top: 20)),
                             pw.Row(
@@ -100,9 +95,9 @@ class CvDataScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            if(userCv.experiences.isNotEmpty)
             _Category(title: 'Experiencia Laboral'),
             _Block(
-            
               title: userCv.experiences.map((e) {
                 return '${e.companyName.toUpperCase()} (${e.startDate} - ${e.endDate})\n ${e.position}';
               }).join('\n'),
@@ -110,13 +105,13 @@ class CvDataScreen extends ConsumerWidget {
                 return e.description;
               }).join('\n'),
             ),
+            if(userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
             _Category(title: 'Educación'),
             _Block(
-            
               title: userCv.studies.map((study) {
                 // Verificar el nivel de estudio según el contenido
                 if (study.institutionName != null && study.degree != null) {
-                  return '${study.institutionName}\n${study.degree}';
+                  return study.institutionName;
                 } else if (study.institutionName != null) {
                   return study.institutionName;
                 } else if (study.degree != null) {
@@ -126,18 +121,13 @@ class CvDataScreen extends ConsumerWidget {
                 }
               }).join('\n'),
               desc: userCv.studies.map((study) {
-                return '${study.institutionName} (${study.startDate} - ${study.endDate})\n${study.degree}';
-            
-            }).join('\n'),
+                return '${study.degree} (${study.startDate} - ${study.endDate})';
+              }).join('\n'),
             ),
+            if(userCv.skills.isNotEmpty)
             _Category(title: 'Otros Conocimientos'),
-            _Block(
-              title: userCv.skills.map((e) {
-                return e.name.toUpperCase();
-              }).join('\n'),
-              desc: userCv.skills.map((e) {
-                return e.level;
-              }).join('\n'),
+            _Block1(
+              title: userCv.skills.map((e) => e.name.toUpperCase()).join(', '),
             ),
           ],
         ),
@@ -153,7 +143,7 @@ class CvDataScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('CV Data')),
+      appBar: AppBar(title: const Text('Generar CV')),
       body: FutureBuilder(
         future: cv,
         builder: (context, snapshot) {
@@ -168,11 +158,129 @@ class CvDataScreen extends ConsumerWidget {
 
           final userCv = snapshot.data!;
           return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Nombre: ${userCv.name.toUpperCase()}'),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Datos Personales',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Text('${userCv.name}, ${userCv.age} años'),
+                          Text(userCv.email),
+                          Text(userCv.phoneNumber),
+                          Text(userCv.address),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 200,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Experiencia Laboral',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Column(
+                            children: userCv.experiences.map((e) {
+                              return Column(
+                                children: [
+                                  Text(
+                                      '${e.companyName} (${e.startDate} - ${e.endDate})'),
+                                  Text(e.position),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Conocimientos',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Column(
+                            children: userCv.skills.map((e) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(e.name),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (userCv.highStudies.isNotEmpty ||
+                      userCv.studies.isNotEmpty)
+                    SizedBox(
+                      width: 200,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: Card(
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Educación',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            Column(
+                              children: [
+                                ...(userCv.studies.toList()).map(
+                                  (study) {
+                                    return Column(
+                                      children: [
+                                        Text(
+                                            '${study.institutionName} (${study.startDate} - ${study.endDate})'),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                ...(userCv.highStudies.toList()).map(
+                                  (study) {
+                                    return Column(
+                                      children: [
+                                        Text(
+                                            '${study.institutionName} (${study.startDate} - ${study.endDate})'),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(
-                height: 300, // Altura específica para `ThemePreview`
+                height: 150, // Altura específica para `ThemePreview`
                 child: ThemePreview(), // Muestra la vista previa de tema
               ),
               const SizedBox(height: 20),
@@ -187,7 +295,7 @@ class CvDataScreen extends ConsumerWidget {
                     );
                   }
                 },
-                child: const Text('Generate PDF'),
+                child: const Text('Generar'),
               ),
             ],
           );
@@ -215,6 +323,37 @@ class _Category extends pw.StatelessWidget {
         title,
         textScaleFactor: 1.5,
       ),
+    );
+  }
+}
+
+class _Block1 extends pw.StatelessWidget {
+  final String title;
+
+  _Block1({required this.title});
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: <pw.Widget>[
+        pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: <pw.Widget>[
+              pw.Container(
+                width: 6,
+                height: 6,
+                margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
+                decoration: const pw.BoxDecoration(
+                  color: green,
+                  shape: pw.BoxShape.circle,
+                ),
+              ),
+              pw.Text(title,
+                  style: pw.Theme.of(context)
+                      .defaultTextStyle
+                      .copyWith(fontWeight: pw.FontWeight.bold)),
+            ]),
+      ],
     );
   }
 }
@@ -269,22 +408,20 @@ class _Block extends pw.StatelessWidget {
 
 Future<pw.PageTheme> _myPageTheme(
     PdfPageFormat format, int selectedThemeIndex) async {
-  // Definir los archivos SVG correspondientes a cada tema
+  print('Índice del tema seleccionado en _myPageTheme: $selectedThemeIndex');
+
   final themeSvgs = [
-    'assets/svg/r0.svg', // Tema 4: SVG 5
-    'assets/svg/r1.svg', // Tema 0: SVG 1
-    'assets/svg/r2.svg', // Tema 1: SVG 2
-    'assets/svg/r3.svg', // Tema 2: SVG 3
-    'assets/svg/r4.svg', // Tema 3: SVG 4
+    'assets/svg/r1.svg',
+    'assets/svg/r2.svg',
+    'assets/svg/r3.svg',
   ];
 
-  // Obtener el archivo SVG basado en el índice del tema seleccionado
   final bgShapePath = themeSvgs[selectedThemeIndex];
+  print('Ruta del SVG seleccionado: $bgShapePath');
 
-  // Cargar el archivo SVG seleccionado
   final bgShape = await rootBundle.loadString(bgShapePath);
 
-  // Aplicar márgenes al formato de página
+  // Configuración del formato
   format = format.applyMargin(
     left: 2.0 * PdfPageFormat.cm,
     top: 4.0 * PdfPageFormat.cm,
@@ -292,23 +429,23 @@ Future<pw.PageTheme> _myPageTheme(
     bottom: 2.0 * PdfPageFormat.cm,
   );
 
-  // Devolver el PageTheme con el SVG dinámico
   return pw.PageTheme(
     pageFormat: format,
-    // Aplicamos el tema seleccionado
     buildBackground: (pw.Context context) {
       return pw.FullPage(
         ignoreMargins: true,
         child: pw.Stack(
           children: [
             pw.Positioned(
-              child: pw.SvgImage(svg: bgShape), // Mostrar SVG en el fondo
+              child: pw.SvgImage(svg: bgShape),
               left: 0,
               top: 0,
             ),
             pw.Positioned(
               child: pw.Transform.rotate(
-                  angle: pi, child: pw.SvgImage(svg: bgShape)), // Rotar el SVG
+                angle: pi,
+                child: pw.SvgImage(svg: bgShape),
+              ),
               right: 0,
               bottom: 0,
             ),

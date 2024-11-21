@@ -16,7 +16,13 @@ class UserCvDataSourceImpl extends UserCvRepository {
     final Directory tempDir = await getApplicationDocumentsDirectory();
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open(
-        [UserCvSchema, ExperienceSchema, StudySchema, SkillSchema],
+        [
+          UserCvSchema,
+          ExperienceSchema,
+          StudySchema,
+          SkillSchema,
+          HighStudySchema
+        ],
         directory: tempDir.path,
         inspector: true,
       );
@@ -29,7 +35,7 @@ class UserCvDataSourceImpl extends UserCvRepository {
     final isar = await db;
     return await isar.userCvs.filter().idEqualTo(id).findFirst();
   }
-  
+
   @override
   Future<void> saveUserCv(UserCv userCv) async {
     final isar = await db;
@@ -38,13 +44,15 @@ class UserCvDataSourceImpl extends UserCvRepository {
       await userCv.experiences.save();
       await userCv.studies.save();
       await userCv.skills.save();
+      await userCv.highStudies.save();
     });
   }
-  
-  @override
-  Stream<List<UserCv>> getAllCvs() async*{
-    final isar = await db;
-    yield*  isar.userCvs.where().watch(fireImmediately: true);
 
+  @override
+  Stream<List<UserCv>> getAllCvs() async* {
+    final isar = await db;
+    yield* isar.userCvs.where().watch(fireImmediately: true);
   }
+
+  
 }

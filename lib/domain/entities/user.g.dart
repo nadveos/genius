@@ -77,6 +77,12 @@ const UserCvSchema = CollectionSchema(
       name: r'skills',
       target: r'Skill',
       single: false,
+    ),
+    r'highStudies': LinkSchema(
+      id: 7900287742299523134,
+      name: r'highStudies',
+      target: r'HighStudy',
+      single: false,
     )
   },
   embeddedSchemas: {},
@@ -167,7 +173,12 @@ Id _userCvGetId(UserCv object) {
 }
 
 List<IsarLinkBase<dynamic>> _userCvGetLinks(UserCv object) {
-  return [object.experiences, object.studies, object.skills];
+  return [
+    object.experiences,
+    object.studies,
+    object.skills,
+    object.highStudies
+  ];
 }
 
 void _userCvAttach(IsarCollection<dynamic> col, Id id, UserCv object) {
@@ -176,6 +187,8 @@ void _userCvAttach(IsarCollection<dynamic> col, Id id, UserCv object) {
       .attach(col, col.isar.collection<Experience>(), r'experiences', id);
   object.studies.attach(col, col.isar.collection<Study>(), r'studies', id);
   object.skills.attach(col, col.isar.collection<Skill>(), r'skills', id);
+  object.highStudies
+      .attach(col, col.isar.collection<HighStudy>(), r'highStudies', id);
 }
 
 extension UserCvQueryWhereSort on QueryBuilder<UserCv, UserCv, QWhere> {
@@ -1383,6 +1396,63 @@ extension UserCvQueryLinks on QueryBuilder<UserCv, UserCv, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
           r'skills', lower, includeLower, upper, includeUpper);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudies(
+      FilterQuery<HighStudy> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'highStudies');
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudiesLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'highStudies', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudiesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'highStudies', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudiesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'highStudies', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudiesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'highStudies', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition>
+      highStudiesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'highStudies', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> highStudiesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'highStudies', lower, includeLower, upper, includeUpper);
     });
   }
 }
@@ -3821,6 +3891,1025 @@ extension StudyQueryProperty on QueryBuilder<Study, Study, QQueryProperty> {
   }
 
   QueryBuilder<Study, String, QQueryOperations> startDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'startDate');
+    });
+  }
+}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetHighStudyCollection on Isar {
+  IsarCollection<HighStudy> get highStudys => this.collection();
+}
+
+const HighStudySchema = CollectionSchema(
+  name: r'HighStudy',
+  id: 4421839945456588619,
+  properties: {
+    r'degree': PropertySchema(
+      id: 0,
+      name: r'degree',
+      type: IsarType.string,
+    ),
+    r'endDate': PropertySchema(
+      id: 1,
+      name: r'endDate',
+      type: IsarType.string,
+    ),
+    r'institutionName': PropertySchema(
+      id: 2,
+      name: r'institutionName',
+      type: IsarType.string,
+    ),
+    r'isGraduated': PropertySchema(
+      id: 3,
+      name: r'isGraduated',
+      type: IsarType.bool,
+    ),
+    r'startDate': PropertySchema(
+      id: 4,
+      name: r'startDate',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _highStudyEstimateSize,
+  serialize: _highStudySerialize,
+  deserialize: _highStudyDeserialize,
+  deserializeProp: _highStudyDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {},
+  embeddedSchemas: {},
+  getId: _highStudyGetId,
+  getLinks: _highStudyGetLinks,
+  attach: _highStudyAttach,
+  version: '3.1.0+1',
+);
+
+int _highStudyEstimateSize(
+  HighStudy object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.degree.length * 3;
+  bytesCount += 3 + object.endDate.length * 3;
+  bytesCount += 3 + object.institutionName.length * 3;
+  bytesCount += 3 + object.startDate.length * 3;
+  return bytesCount;
+}
+
+void _highStudySerialize(
+  HighStudy object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.degree);
+  writer.writeString(offsets[1], object.endDate);
+  writer.writeString(offsets[2], object.institutionName);
+  writer.writeBool(offsets[3], object.isGraduated);
+  writer.writeString(offsets[4], object.startDate);
+}
+
+HighStudy _highStudyDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = HighStudy();
+  object.degree = reader.readString(offsets[0]);
+  object.endDate = reader.readString(offsets[1]);
+  object.id = id;
+  object.institutionName = reader.readString(offsets[2]);
+  object.isGraduated = reader.readBool(offsets[3]);
+  object.startDate = reader.readString(offsets[4]);
+  return object;
+}
+
+P _highStudyDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _highStudyGetId(HighStudy object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _highStudyGetLinks(HighStudy object) {
+  return [];
+}
+
+void _highStudyAttach(IsarCollection<dynamic> col, Id id, HighStudy object) {
+  object.id = id;
+}
+
+extension HighStudyQueryWhereSort
+    on QueryBuilder<HighStudy, HighStudy, QWhere> {
+  QueryBuilder<HighStudy, HighStudy, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension HighStudyQueryWhere
+    on QueryBuilder<HighStudy, HighStudy, QWhereClause> {
+  QueryBuilder<HighStudy, HighStudy, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterWhereClause> idNotEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension HighStudyQueryFilter
+    on QueryBuilder<HighStudy, HighStudy, QFilterCondition> {
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'degree',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'degree',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'degree',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'degree',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> degreeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'degree',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'endDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'endDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'endDate',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> endDateIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endDate',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      endDateIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'endDate',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> idEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'institutionName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'institutionName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'institutionName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'institutionName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      institutionNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'institutionName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> isGraduatedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isGraduated',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      startDateGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'startDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'startDate',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'startDate',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition> startDateIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'startDate',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterFilterCondition>
+      startDateIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'startDate',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension HighStudyQueryObject
+    on QueryBuilder<HighStudy, HighStudy, QFilterCondition> {}
+
+extension HighStudyQueryLinks
+    on QueryBuilder<HighStudy, HighStudy, QFilterCondition> {}
+
+extension HighStudyQuerySortBy on QueryBuilder<HighStudy, HighStudy, QSortBy> {
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByDegree() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'degree', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByDegreeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'degree', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByEndDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByEndDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByInstitutionName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'institutionName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByInstitutionNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'institutionName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByIsGraduated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isGraduated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByIsGraduatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isGraduated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByStartDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> sortByStartDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startDate', Sort.desc);
+    });
+  }
+}
+
+extension HighStudyQuerySortThenBy
+    on QueryBuilder<HighStudy, HighStudy, QSortThenBy> {
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByDegree() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'degree', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByDegreeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'degree', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByEndDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByEndDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endDate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByInstitutionName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'institutionName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByInstitutionNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'institutionName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByIsGraduated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isGraduated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByIsGraduatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isGraduated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByStartDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QAfterSortBy> thenByStartDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startDate', Sort.desc);
+    });
+  }
+}
+
+extension HighStudyQueryWhereDistinct
+    on QueryBuilder<HighStudy, HighStudy, QDistinct> {
+  QueryBuilder<HighStudy, HighStudy, QDistinct> distinctByDegree(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'degree', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QDistinct> distinctByEndDate(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'endDate', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QDistinct> distinctByInstitutionName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'institutionName',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QDistinct> distinctByIsGraduated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isGraduated');
+    });
+  }
+
+  QueryBuilder<HighStudy, HighStudy, QDistinct> distinctByStartDate(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'startDate', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension HighStudyQueryProperty
+    on QueryBuilder<HighStudy, HighStudy, QQueryProperty> {
+  QueryBuilder<HighStudy, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<HighStudy, String, QQueryOperations> degreeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'degree');
+    });
+  }
+
+  QueryBuilder<HighStudy, String, QQueryOperations> endDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'endDate');
+    });
+  }
+
+  QueryBuilder<HighStudy, String, QQueryOperations> institutionNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'institutionName');
+    });
+  }
+
+  QueryBuilder<HighStudy, bool, QQueryOperations> isGraduatedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isGraduated');
+    });
+  }
+
+  QueryBuilder<HighStudy, String, QQueryOperations> startDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'startDate');
     });
