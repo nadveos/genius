@@ -22,8 +22,6 @@ List<PdfColor> themeColors = [
   const PdfColor.fromInt(0xffBAE1FF),
 ];
 
-
-
 class CvDataScreen extends ConsumerStatefulWidget {
   final Id userId;
   const CvDataScreen({super.key, required this.userId});
@@ -73,7 +71,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
 
       final pageTheme =
           await _myPageTheme(format, selectedTheme); // Pasa el índice
-       final themeColor = themeColors[themeIndex];
+      final themeColor = themeColors[themeIndex];
       pdf.addPage(
         pw.MultiPage(
           pageTheme: pageTheme,
@@ -94,7 +92,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                 style: pw.Theme.of(context)
                                     .defaultTextStyle
                                     .copyWith(fontWeight: pw.FontWeight.bold)),
-                            pw.Text(userCv.nationality,
+                            pw.Text('${userCv.age} años',
                                 textScaleFactor: 1.5,
                                 style: pw.Theme.of(context)
                                     .defaultTextStyle
@@ -113,7 +111,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                       pw.CrossAxisAlignment.start,
                                   children: <pw.Widget>[
                                     pw.Text(userCv.address),
-                                    pw.Text('${userCv.age} años'),
+                                    pw.Text(userCv.nationality),
                                   ],
                                 ),
                                 pw.Column(
@@ -198,7 +196,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
             if (userCv.skills.isNotEmpty)
               _Category(title: 'Otros Conocimientos', color: themeColor),
             _Block1(
-            color: themeColor,
+              color: themeColor,
               title: userCv.skills.map((e) => e.name.toUpperCase()).join(', '),
             ),
           ],
@@ -452,7 +450,7 @@ class _Block1 extends pw.StatelessWidget {
                 width: 6,
                 height: 6,
                 margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
-                decoration:  pw.BoxDecoration(
+                decoration: pw.BoxDecoration(
                   color: color,
                   shape: pw.BoxShape.circle,
                 ),
