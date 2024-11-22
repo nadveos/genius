@@ -1,13 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'dart:typed_data';
-
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 class CreateCvScreen extends ConsumerStatefulWidget {
   const CreateCvScreen({super.key});
@@ -64,34 +61,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final TextEditingController _conocimientoController = TextEditingController();
   final List<Map<String, String>> _conocimientos = [];
 
-  
-  
-  
-  Uint8List? _imageBytes;
-
-  Future<void> pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-
-    if (file != null) {
-      final bytes = await file.readAsBytes(); // Leer imagen como Uint8List
-      setState(() {
-        _imageBytes = bytes;
-      });
-    }
-  }
-
-  Future<void> takePicture() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.camera);
-
-    if (file != null) {
-      final bytes = await file.readAsBytes(); // Leer imagen como Uint8List
-      setState(() {
-        _imageBytes = bytes;
-      });
-    }
-  }
+ 
 
   void _guardarCV() async {
     // Crear la instancia de UserCv
@@ -102,8 +72,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       phoneNumber: _telefonoController.text,
       address: _direccionController.text,
       nationality: _nationalityController.text,
-      image:
-          _imageBytes?.toList(), // Puedes completar esto según tus necesidades
+       // Puedes completar esto según tus necesidades
     );
 
     // Crear listas de experiencias, estudios y habilidades
@@ -116,8 +85,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           ..description = e['funciones'] ?? '')
         .toList();
 
-    final studies =
-        _educacion.where((e) => e['nivelSecundario'] == null).map((e) {
+    final studies = _educacion
+        .where((e) => e['nivelSecundario']?.isNotEmpty ?? false)
+        .map((e) {
       return Study()
         ..institutionName = e['institution'] ?? ''
         ..degree = e['titulo'] ?? ''
@@ -126,14 +96,14 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         ..isGraduated = e['poseeTituloSecundario'] ?? false;
     }).toList();
 
-    final highStudies =
-        _highEducacion.map((e) => HighStudy()
-        ..institutionName = e['institution'] ?? ''
-        ..degree = e['titulo'] ?? ''
-        ..startDate = e['desde'] ?? ''
-        ..endDate = e['hasta'] ?? ''
-        ..isGraduated = e['poseeTituloTerciario'] ?? false
-    ).toList();
+    final highStudies = _highEducacion
+        .map((e) => HighStudy()
+          ..institutionName = e['institution'] ?? ''
+          ..degree = e['titulo'] ?? ''
+          ..startDate = e['desde'] ?? ''
+          ..endDate = e['hasta'] ?? ''
+          ..isGraduated = e['poseeTituloTerciario'] ?? false)
+        .toList();
 
     final skills = _conocimientos
         .map((c) => Skill()
@@ -190,7 +160,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       _step4(),
       _step5(),
       _step6(),
-      _step7()
+    
     ];
     bool validateStep(int index) {
       switch (index) {
@@ -202,14 +172,14 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           return _experiencias.isNotEmpty;
         case 4:
           return _nivelSecundario == 'Secundario En Curso' ||
-              _nivelSecundario == 'Secundario Incompleto' || _secundarioGuardado;
+              _nivelSecundario == 'Secundario Incompleto' ||
+              _nivelSecundario == 'Secundario Completo';
         case 5:
           return _highEducacion.isNotEmpty || _highEducacion.isEmpty;
         case 6:
           return _conocimientos.isNotEmpty;
-        case 7:
-          return true;
-         // No requiere validación
+        
+        // No requiere validación
         default:
           return false;
       }
@@ -255,7 +225,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           final isLastStep = _index == steps.length - 1;
           return Row(
             children: <Widget>[
-            if (_index > 0)
+              if (_index > 0)
                 TextButton(
                   onPressed: details.onStepCancel,
                   child: const Text('Atrás'),
@@ -264,7 +234,6 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                 onPressed: details.onStepContinue,
                 child: Text(isLastStep ? 'Guardar CV' : 'Continuar'),
               ),
-              
             ],
           );
         },
@@ -272,33 +241,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     );
   }
 
-  Step _step7() {
-    return Step(
-        title: const Text('Tu imagen'),
-        content: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                  'Este paso es opcional, puedes agregar una imagen de perfil'),
-              CircleAvatar(
-                radius: 200,
-                backgroundImage: _imageBytes != null
-                    ? MemoryImage(_imageBytes!) // Mostrar la imagen
-                    : null, // Dejar vacío si no hay imagen
-                child: _imageBytes == null
-                    ? const Icon(Icons.person, size: 50) // Ícono predeterminado
-                    : null,
-              ),
-              ElevatedButton(
-                  onPressed: pickImage,
-                  child: const Text('seleccionar imagen')),
-              ElevatedButton(
-                  onPressed: takePicture, child: const Text('Tomar foto'))
-            ],
-          ),
-        ));
-  }
+  
+
 
   Step _step6() {
     return Step(
@@ -355,8 +299,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         key: _formKeys[5],
         child: Column(
           children: [
-            
-              for (var highEducacion in _highEducacion)
+            for (var highEducacion in _highEducacion)
               ExpansionTile(
                 title: Text(highEducacion['institution']!),
                 children: [
@@ -365,7 +308,6 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   ),
                 ],
               ),
-
             TextFormField(
               controller: _institutioHighController,
               decoration:
@@ -426,7 +368,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if ( _formKeys[5].currentState!.validate()) {
+                if (_formKeys[5].currentState!.validate()) {
                   setState(() {
                     final highEducacion = {
                       'institution': _institutioHighController.text,
@@ -453,7 +395,6 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               },
               child: const Text('Guardar Estudios Terciarios/Universitarios'),
             ),
-
           ],
         ),
       ),
@@ -569,6 +510,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                             'poseeTituloSecundario': _poseeTituloSecundario,
                             'desde': _startStudyController.text,
                             'hasta': _endStudyController.text,
+                            'titulo': _tituloSecundarioController.text,
                           };
 
                           _educacion.add(educacion);

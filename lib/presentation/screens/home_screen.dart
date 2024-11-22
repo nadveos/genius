@@ -1,15 +1,24 @@
+// ignore_for_file: avoid_print
+
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends ConsumerWidget {
-
-  const HomeScreen({super.key, });
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  HomeScreenState createState() => HomeScreenState();
+}
+
+class HomeScreenState extends ConsumerState<HomeScreen> {
+
+  @override
+  Widget build(BuildContext context) {
     final userCvAsyncValue = ref.watch(isarRealUserProvider);
     return Scaffold(
       appBar: AppBar(
@@ -23,7 +32,6 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      
       body: userCvAsyncValue.when(
         data: (cvList) {
           if (cvList.isEmpty) {
@@ -45,6 +53,8 @@ class HomeScreen extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
+                          print(cvList.length);
+                          print(cvList[index].id);
                           context.push('/cv-data/${cvList[index].id}');
                         },
                       ),

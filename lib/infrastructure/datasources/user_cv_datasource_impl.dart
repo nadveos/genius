@@ -31,9 +31,13 @@ class UserCvDataSourceImpl extends UserCvRepository {
   }
 
   @override
-  Future<UserCv?> getUserCv(Id id) async {
+  Future<UserCv> getUserCv(Id id) async {
     final isar = await db;
-    return await isar.userCvs.filter().idEqualTo(id).findFirst();
+    final userCv = await isar.userCvs.filter().idEqualTo(id).findFirst();
+    if (userCv == null) {
+      throw Exception('UserCv not found');
+    }
+    return userCv;
   }
 
   @override

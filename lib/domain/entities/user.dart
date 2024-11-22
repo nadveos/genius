@@ -11,7 +11,6 @@ class UserCv {
   final String email;
   final String phoneNumber;
   final String address;
-  List<int>? image ;
   final String nationality;
   final IsarLinks<Experience> experiences = IsarLinks<Experience>();
   final IsarLinks<Study> studies = IsarLinks<Study>();
@@ -24,7 +23,6 @@ class UserCv {
     required this.phoneNumber,
     required this.address,
     required this.age,
-    this.image,
     required this.nationality
   });
 }

@@ -32,23 +32,18 @@ const UserCvSchema = CollectionSchema(
       name: r'email',
       type: IsarType.string,
     ),
-    r'image': PropertySchema(
-      id: 3,
-      name: r'image',
-      type: IsarType.longList,
-    ),
     r'name': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'nationality': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'nationality',
       type: IsarType.string,
     ),
     r'phoneNumber': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'phoneNumber',
       type: IsarType.string,
     )
@@ -101,12 +96,6 @@ int _userCvEstimateSize(
   bytesCount += 3 + object.address.length * 3;
   bytesCount += 3 + object.age.length * 3;
   bytesCount += 3 + object.email.length * 3;
-  {
-    final value = object.image;
-    if (value != null) {
-      bytesCount += 3 + value.length * 8;
-    }
-  }
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.nationality.length * 3;
   bytesCount += 3 + object.phoneNumber.length * 3;
@@ -122,10 +111,9 @@ void _userCvSerialize(
   writer.writeString(offsets[0], object.address);
   writer.writeString(offsets[1], object.age);
   writer.writeString(offsets[2], object.email);
-  writer.writeLongList(offsets[3], object.image);
-  writer.writeString(offsets[4], object.name);
-  writer.writeString(offsets[5], object.nationality);
-  writer.writeString(offsets[6], object.phoneNumber);
+  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[4], object.nationality);
+  writer.writeString(offsets[5], object.phoneNumber);
 }
 
 UserCv _userCvDeserialize(
@@ -138,10 +126,9 @@ UserCv _userCvDeserialize(
     address: reader.readString(offsets[0]),
     age: reader.readString(offsets[1]),
     email: reader.readString(offsets[2]),
-    image: reader.readLongList(offsets[3]),
-    name: reader.readString(offsets[4]),
-    nationality: reader.readString(offsets[5]),
-    phoneNumber: reader.readString(offsets[6]),
+    name: reader.readString(offsets[3]),
+    nationality: reader.readString(offsets[4]),
+    phoneNumber: reader.readString(offsets[5]),
   );
   object.id = id;
   return object;
@@ -161,12 +148,10 @@ P _userCvDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readLongList(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
-    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -709,159 +694,6 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'image',
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'image',
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'image',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'image',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'image',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'image',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'image',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
     });
   }
 
@@ -1667,12 +1499,6 @@ extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
     });
   }
 
-  QueryBuilder<UserCv, UserCv, QDistinct> distinctByImage() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'image');
-    });
-  }
-
   QueryBuilder<UserCv, UserCv, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1717,12 +1543,6 @@ extension UserCvQueryProperty on QueryBuilder<UserCv, UserCv, QQueryProperty> {
   QueryBuilder<UserCv, String, QQueryOperations> emailProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'email');
-    });
-  }
-
-  QueryBuilder<UserCv, List<int>?, QQueryOperations> imageProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'image');
     });
   }
 

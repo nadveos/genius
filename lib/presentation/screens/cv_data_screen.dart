@@ -9,26 +9,60 @@ import 'package:cvgenius/presentation/widgets/pdf_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
-const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
-const sep = 120.0;
+List<PdfColor> themeColors = [
+  const PdfColor.fromInt(0xffCDF1E7),
+  const PdfColor.fromInt(0xffFFDFBA),
+  const PdfColor.fromInt(0xffBAE1FF),
+];
 
-class CvDataScreen extends ConsumerWidget {
+
+
+class CvDataScreen extends ConsumerStatefulWidget {
   final Id userId;
   const CvDataScreen({super.key, required this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dataCv = ref.watch(isarUserProvider);
-    final cv = dataCv.getUserCv(userId);
+  ConsumerState<CvDataScreen> createState() => _CvDataScreenState();
+}
+
+class _CvDataScreenState extends ConsumerState<CvDataScreen> {
+  Uint8List? _imageBytes;
+  int selectedThemeIndex = 0;
+  Future<void> pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+
+    if (file != null) {
+      final bytes = await file.readAsBytes(); // Leer imagen como Uint8List
+      setState(() {
+        _imageBytes = bytes;
+      });
+    }
+  }
+
+  Future<void> takePicture() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.camera);
+
+    if (file != null) {
+      final bytes = await file.readAsBytes(); // Leer imagen como Uint8List
+      setState(() {
+        _imageBytes = bytes;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cvFuture = ref.watch(isarUserProvider).getUserCv(widget.userId);
     final selectedTheme = ref.read(selectedThemeProvider);
-    // Crear una variable para la decoración del tema
 
     Future<String> generatePdf(
         UserCv userCv, int themeIndex, PdfPageFormat format) async {
@@ -39,6 +73,7 @@ class CvDataScreen extends ConsumerWidget {
 
       final pageTheme =
           await _myPageTheme(format, selectedTheme); // Pasa el índice
+       final themeColor = themeColors[themeIndex];
       pdf.addPage(
         pw.MultiPage(
           pageTheme: pageTheme,
@@ -46,16 +81,21 @@ class CvDataScreen extends ConsumerWidget {
             pw.Partitions(
               children: [
                 pw.Partition(
-                  child: pw.Column(
+                  child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: <pw.Widget>[
-                      pw.Container(
-                        padding: const pw.EdgeInsets.only(left: 30, bottom: 20),
+                    children: [
+                      pw.Expanded(
+                        flex: 2,
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: <pw.Widget>[
                             pw.Text(userCv.name.toUpperCase(),
                                 textScaleFactor: 2,
+                                style: pw.Theme.of(context)
+                                    .defaultTextStyle
+                                    .copyWith(fontWeight: pw.FontWeight.bold)),
+                            pw.Text(userCv.nationality,
+                                textScaleFactor: 1.5,
                                 style: pw.Theme.of(context)
                                     .defaultTextStyle
                                     .copyWith(fontWeight: pw.FontWeight.bold)),
@@ -90,14 +130,26 @@ class CvDataScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
+                      if (_imageBytes != null && _imageBytes!.isNotEmpty)
+                        pw.Expanded(
+                          flex: 1,
+                          child: pw.Align(
+                            alignment: pw.Alignment.topRight,
+                            child: pw.ClipOval(
+                              child: pw.Image(pw.MemoryImage(_imageBytes!),
+                                  width: 100, height: 100),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-            if(userCv.experiences.isNotEmpty)
-            _Category(title: 'Experiencia Laboral'),
+            if (userCv.experiences.isNotEmpty)
+              _Category(title: 'Experiencia Laboral', color: themeColor),
             _Block(
+              color: themeColor,
               title: userCv.experiences.map((e) {
                 return '${e.companyName.toUpperCase()} (${e.startDate} - ${e.endDate})\n ${e.position}';
               }).join('\n'),
@@ -105,9 +157,10 @@ class CvDataScreen extends ConsumerWidget {
                 return e.description;
               }).join('\n'),
             ),
-            if(userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
-            _Category(title: 'Educación'),
+            if (userCv.studies.isNotEmpty)
+              _Category(title: 'Educación', color: themeColor),
             _Block(
+              color: themeColor,
               title: userCv.studies.map((study) {
                 // Verificar el nivel de estudio según el contenido
                 if (study.institutionName != null && study.degree != null) {
@@ -124,9 +177,28 @@ class CvDataScreen extends ConsumerWidget {
                 return '${study.degree} (${study.startDate} - ${study.endDate})';
               }).join('\n'),
             ),
-            if(userCv.skills.isNotEmpty)
-            _Category(title: 'Otros Conocimientos'),
+            if (userCv.highStudies.isNotEmpty)
+              _Block(
+                color: themeColor,
+                title: userCv.highStudies.map((study) {
+                  if (study.institutionName != null && study.degree != null) {
+                    return study.institutionName;
+                  } else if (study.institutionName != null) {
+                    return study.institutionName;
+                  } else if (study.degree != null) {
+                    return study.degree;
+                  } else {
+                    return 'Información no disponible';
+                  }
+                }).join('\n'),
+                desc: userCv.highStudies.map((study) {
+                  return '${study.degree} (${study.startDate} - ${study.endDate})';
+                }).join('\n'),
+              ),
+            if (userCv.skills.isNotEmpty)
+              _Category(title: 'Otros Conocimientos', color: themeColor),
             _Block1(
+            color: themeColor,
               title: userCv.skills.map((e) => e.name.toUpperCase()).join(', '),
             ),
           ],
@@ -144,119 +216,75 @@ class CvDataScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Generar CV')),
-      body: FutureBuilder(
-        future: cv,
+      body: FutureBuilder<UserCv?>(
+        future: cvFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return const Center(
                 child: Text('No se encontró información del usuario'));
           }
 
           final userCv = snapshot.data!;
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  SizedBox(
-                    width: 200,
-                    height: MediaQuery.of(context).size.height * 0.2,
-                    child: Card(
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Datos Personales',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Text('${userCv.name}, ${userCv.age} años'),
-                          Text(userCv.email),
-                          Text(userCv.phoneNumber),
-                          Text(userCv.address),
-                        ],
-                      ),
+          print(userCv.id);
+          return SingleChildScrollView(
+            controller: ScrollController(),
+            scrollDirection: Axis.vertical,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: Card(
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Datos Personales',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Text('${userCv.name}, ${userCv.age} años'),
+                        Text(userCv.email),
+                        Text(userCv.phoneNumber),
+                        Text(userCv.address),
+                      ],
                     ),
                   ),
+                ),
+                if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
                   SizedBox(
                     width: 200,
-                    height: MediaQuery.of(context).size.height * 0.2,
                     child: Card(
                       child: Column(
                         children: [
                           const Text(
-                            'Experiencia Laboral',
+                            'Educación',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                          Column(
-                            children: userCv.experiences.map((e) {
-                              return Column(
-                                children: [
-                                  Text(
-                                      '${e.companyName} (${e.startDate} - ${e.endDate})'),
-                                  Text(e.position),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 200,
-                    height: MediaQuery.of(context).size.height * 0.2,
-                    child: Card(
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Conocimientos',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Column(
-                            children: userCv.skills.map((e) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(e.name),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (userCv.highStudies.isNotEmpty ||
-                      userCv.studies.isNotEmpty)
-                    SizedBox(
-                      width: 200,
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      child: Card(
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Educación',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            Column(
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ...(userCv.studies.toList()).map(
                                   (study) {
                                     return Column(
                                       children: [
                                         Text(
-                                            '${study.institutionName} (${study.startDate} - ${study.endDate})'),
+                                          study.institutionName,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        if (study.isGraduated == true)
+                                          const Text(
+                                            'Secundario Completo',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
                                       ],
                                     );
                                   },
@@ -266,38 +294,118 @@ class CvDataScreen extends ConsumerWidget {
                                     return Column(
                                       children: [
                                         Text(
-                                            '${study.institutionName} (${study.startDate} - ${study.endDate})'),
+                                          study.institutionName,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(study.degree),
+                                        if (study.isGraduated != true)
+                                          const Text(
+                                            'En curso',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
                                       ],
                                     );
                                   },
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(
-                height: 150, // Altura específica para `ThemePreview`
-                child: ThemePreview(), // Muestra la vista previa de tema
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  final filePath = await generatePdf(
-                      userCv, selectedTheme, PdfPageFormat.a4);
-                  final result = await OpenFile.open(filePath);
-                  if (result.type != ResultType.done) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No se pudo abrir el PDF')),
-                    );
-                  }
-                },
-                child: const Text('Generar'),
-              ),
-            ],
+                  ),
+                SizedBox(
+                  width: 200,
+                  child: Card(
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Experiencia Laboral',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Column(
+                          children: userCv.experiences.map((e) {
+                            return Column(
+                              children: [
+                                Text(
+                                    '${e.companyName} (${e.startDate} - ${e.endDate})'),
+                                Text(e.position),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 200,
+                  child: Card(
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Conocimientos',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Column(
+                          children: userCv.skills.map((e) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(e.name),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_imageBytes != null && _imageBytes!.isNotEmpty)
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundImage: MemoryImage(_imageBytes!),
+                  ),
+                const SizedBox(
+                  height: 80, // Altura específica para `ThemePreview`
+                  child: ThemePreview(), // Muestra la vista previa de tema
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: pickImage,
+                      icon: const Icon(Icons.browse_gallery),
+                      label: const Text('Seleccionar Imagen'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton.icon(
+                      onPressed: takePicture,
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Tomar Foto'),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final filePath = await generatePdf(
+                        userCv, selectedTheme, PdfPageFormat.a4);
+                    final result = await OpenFile.open(filePath);
+                    if (result.type != ResultType.done) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('No se pudo abrir el PDF')),
+                      );
+                    }
+                  },
+                  child: const Text('Generar'),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -306,16 +414,17 @@ class CvDataScreen extends ConsumerWidget {
 }
 
 class _Category extends pw.StatelessWidget {
-  _Category({required this.title});
+  _Category({required this.title, required this.color});
 
   final String title;
+  final PdfColor color;
 
   @override
   pw.Widget build(pw.Context context) {
     return pw.Container(
-      decoration: const pw.BoxDecoration(
-        color: lightGreen,
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
+      decoration: pw.BoxDecoration(
+        color: color,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
       ),
       margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
       padding: const pw.EdgeInsets.fromLTRB(10, 4, 10, 4),
@@ -329,8 +438,8 @@ class _Category extends pw.StatelessWidget {
 
 class _Block1 extends pw.StatelessWidget {
   final String title;
-
-  _Block1({required this.title});
+  final PdfColor color;
+  _Block1({required this.title, required this.color});
   @override
   pw.Widget build(pw.Context context) {
     return pw.Column(
@@ -343,8 +452,8 @@ class _Block1 extends pw.StatelessWidget {
                 width: 6,
                 height: 6,
                 margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
-                decoration: const pw.BoxDecoration(
-                  color: green,
+                decoration:  pw.BoxDecoration(
+                  color: color,
                   shape: pw.BoxShape.circle,
                 ),
               ),
@@ -361,9 +470,12 @@ class _Block1 extends pw.StatelessWidget {
 class _Block extends pw.StatelessWidget {
   final String title;
   final String desc;
+  final PdfColor color;
+
   _Block({
     required this.title,
     required this.desc,
+    required this.color,
   });
 
   @override
@@ -378,8 +490,8 @@ class _Block extends pw.StatelessWidget {
                 width: 6,
                 height: 6,
                 margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
-                decoration: const pw.BoxDecoration(
-                  color: green,
+                decoration: pw.BoxDecoration(
+                  color: color,
                   shape: pw.BoxShape.circle,
                 ),
               ),
@@ -390,8 +502,8 @@ class _Block extends pw.StatelessWidget {
               pw.Spacer(),
             ]),
         pw.Container(
-          decoration: const pw.BoxDecoration(
-              border: pw.Border(left: pw.BorderSide(color: green, width: 2))),
+          decoration: pw.BoxDecoration(
+              border: pw.Border(left: pw.BorderSide(color: color, width: 2))),
           padding: const pw.EdgeInsets.only(left: 10, top: 5, bottom: 5),
           margin: const pw.EdgeInsets.only(left: 5),
           child: pw.Column(

@@ -8,7 +8,7 @@ class UserCvRepositoryImpl extends UserCvRepository {
 
   UserCvRepositoryImpl({required this.datasource});
   @override
-  Future<UserCv?> getUserCv(Id id) {
+  Future<UserCv> getUserCv(Id id) {
     return datasource.getUserCv(id);
   }
 
