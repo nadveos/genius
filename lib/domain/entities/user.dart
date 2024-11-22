@@ -1,8 +1,9 @@
+
 import 'package:isar/isar.dart';
 
 part 'user.g.dart';
 
-@collection
+@Collection()
 class UserCv {
   Id id = Isar.autoIncrement;
   final String name;
@@ -10,7 +11,7 @@ class UserCv {
   final String email;
   final String phoneNumber;
   final String address;
-  final String photoUrl ;
+  List<int>? image ;
   final String nationality;
   final IsarLinks<Experience> experiences = IsarLinks<Experience>();
   final IsarLinks<Study> studies = IsarLinks<Study>();
@@ -23,7 +24,7 @@ class UserCv {
     required this.phoneNumber,
     required this.address,
     required this.age,
-    required this.photoUrl,
+    this.image,
     required this.nationality
   });
 }

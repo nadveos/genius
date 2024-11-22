@@ -32,24 +32,24 @@ const UserCvSchema = CollectionSchema(
       name: r'email',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(
+    r'image': PropertySchema(
       id: 3,
+      name: r'image',
+      type: IsarType.longList,
+    ),
+    r'name': PropertySchema(
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'nationality': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'nationality',
       type: IsarType.string,
     ),
     r'phoneNumber': PropertySchema(
-      id: 5,
-      name: r'phoneNumber',
-      type: IsarType.string,
-    ),
-    r'photoUrl': PropertySchema(
       id: 6,
-      name: r'photoUrl',
+      name: r'phoneNumber',
       type: IsarType.string,
     )
   },
@@ -101,10 +101,15 @@ int _userCvEstimateSize(
   bytesCount += 3 + object.address.length * 3;
   bytesCount += 3 + object.age.length * 3;
   bytesCount += 3 + object.email.length * 3;
+  {
+    final value = object.image;
+    if (value != null) {
+      bytesCount += 3 + value.length * 8;
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.nationality.length * 3;
   bytesCount += 3 + object.phoneNumber.length * 3;
-  bytesCount += 3 + object.photoUrl.length * 3;
   return bytesCount;
 }
 
@@ -117,10 +122,10 @@ void _userCvSerialize(
   writer.writeString(offsets[0], object.address);
   writer.writeString(offsets[1], object.age);
   writer.writeString(offsets[2], object.email);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.nationality);
-  writer.writeString(offsets[5], object.phoneNumber);
-  writer.writeString(offsets[6], object.photoUrl);
+  writer.writeLongList(offsets[3], object.image);
+  writer.writeString(offsets[4], object.name);
+  writer.writeString(offsets[5], object.nationality);
+  writer.writeString(offsets[6], object.phoneNumber);
 }
 
 UserCv _userCvDeserialize(
@@ -133,10 +138,10 @@ UserCv _userCvDeserialize(
     address: reader.readString(offsets[0]),
     age: reader.readString(offsets[1]),
     email: reader.readString(offsets[2]),
-    name: reader.readString(offsets[3]),
-    nationality: reader.readString(offsets[4]),
-    phoneNumber: reader.readString(offsets[5]),
-    photoUrl: reader.readString(offsets[6]),
+    image: reader.readLongList(offsets[3]),
+    name: reader.readString(offsets[4]),
+    nationality: reader.readString(offsets[5]),
+    phoneNumber: reader.readString(offsets[6]),
   );
   object.id = id;
   return object;
@@ -156,7 +161,7 @@ P _userCvDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongList(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
@@ -707,6 +712,159 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'image',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'image',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'image',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'image',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'image',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'image',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> imageLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'image',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1095,136 +1253,6 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
       ));
     });
   }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'photoUrl',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'photoUrl',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'photoUrl',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'photoUrl',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> photoUrlIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'photoUrl',
-        value: '',
-      ));
-    });
-  }
 }
 
 extension UserCvQueryObject on QueryBuilder<UserCv, UserCv, QFilterCondition> {}
@@ -1529,18 +1557,6 @@ extension UserCvQuerySortBy on QueryBuilder<UserCv, UserCv, QSortBy> {
       return query.addSortBy(r'phoneNumber', Sort.desc);
     });
   }
-
-  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByPhotoUrl() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'photoUrl', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByPhotoUrlDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'photoUrl', Sort.desc);
-    });
-  }
 }
 
 extension UserCvQuerySortThenBy on QueryBuilder<UserCv, UserCv, QSortThenBy> {
@@ -1627,18 +1643,6 @@ extension UserCvQuerySortThenBy on QueryBuilder<UserCv, UserCv, QSortThenBy> {
       return query.addSortBy(r'phoneNumber', Sort.desc);
     });
   }
-
-  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByPhotoUrl() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'photoUrl', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByPhotoUrlDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'photoUrl', Sort.desc);
-    });
-  }
 }
 
 extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
@@ -1663,6 +1667,12 @@ extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QDistinct> distinctByImage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'image');
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1681,13 +1691,6 @@ extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'phoneNumber', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<UserCv, UserCv, QDistinct> distinctByPhotoUrl(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'photoUrl', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1717,6 +1720,12 @@ extension UserCvQueryProperty on QueryBuilder<UserCv, UserCv, QQueryProperty> {
     });
   }
 
+  QueryBuilder<UserCv, List<int>?, QQueryOperations> imageProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'image');
+    });
+  }
+
   QueryBuilder<UserCv, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
@@ -1732,12 +1741,6 @@ extension UserCvQueryProperty on QueryBuilder<UserCv, UserCv, QQueryProperty> {
   QueryBuilder<UserCv, String, QQueryOperations> phoneNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'phoneNumber');
-    });
-  }
-
-  QueryBuilder<UserCv, String, QQueryOperations> photoUrlProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'photoUrl');
     });
   }
 }

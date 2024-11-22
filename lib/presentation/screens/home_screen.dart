@@ -23,13 +23,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     context.push('/create-cv');
-      //   },
-      //   child: const Icon(Icons.add),
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      
       body: userCvAsyncValue.when(
         data: (cvList) {
           if (cvList.isEmpty) {
