@@ -7,4 +7,5 @@ abstract class UserCvDataSource {
   Future<UserCv> getUserCv(Id id);
   Stream<List<UserCv?>> getAllCvs();
   Future<void> saveUserCv(UserCv userCv);
+  Future <void> deleteCv(Id id);
 }

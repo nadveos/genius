@@ -21,4 +21,9 @@ class UserCvRepositoryImpl extends UserCvRepository {
   Stream<List<UserCv?>> getAllCvs() {
     return datasource.getAllCvs();
   }
+  
+  @override
+  Future<void> deleteCv(Id id) {
+   return datasource.deleteCv(id);
+  }
 }

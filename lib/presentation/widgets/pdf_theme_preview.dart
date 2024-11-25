@@ -38,6 +38,18 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
     final selectedTheme = ref.watch(selectedThemeProvider);
     final controller = ScrollController();
 
+    // Define una lista de colores para diferentes temas
+    final themeColors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+    ];
+
+    // Asegúrate de que el índice de `selectedTheme` no exceda la longitud de `themeColors`
+    final selectedColor = themeColors[selectedTheme % themeColors.length];
+
     return FutureBuilder<List<String>>(
       future: _svgFilesFuture,
       builder: (context, snapshot) {
@@ -53,6 +65,27 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
 
         return Column(
           children: [
+            // Vista previa del tema seleccionado
+            Container(
+              height: 80,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: selectedColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: selectedColor, width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  'Vista previa de tema',
+                  style: TextStyle(
+                    color: selectedColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+            // Lista horizontal de temas
             Expanded(
               child: ListView.builder(
                 controller: controller,
@@ -65,9 +98,9 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
 
                   return GestureDetector(
                     onTap: () {
-                      ref.read(selectedThemeProvider.notifier).selectTheme(index);
-                      // ignore: avoid_print
-                      print('Seleccionado: $index, Archivo: $svgFile');
+                      ref
+                          .read(selectedThemeProvider.notifier)
+                          .selectTheme(index);
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -75,10 +108,10 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.black.withOpacity(0.25)
+                            ? selectedColor.withOpacity(0.25)
                             : Colors.white,
                         border: Border.all(
-                          color: isSelected ? Colors.blue : Colors.grey,
+                          color: isSelected ? selectedColor : Colors.grey,
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -94,7 +127,6 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
                 },
               ),
             ),
-            
           ],
         );
       },

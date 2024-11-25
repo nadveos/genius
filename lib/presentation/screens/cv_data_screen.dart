@@ -3,10 +3,9 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:cvgenius/config/router/router.dart';
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
-import 'package:cvgenius/presentation/widgets/pdf_styles.dart';
+import 'package:cvgenius/presentation/widgets/pdf_theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,9 +70,11 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
       final selectedTheme =
           ref.read(selectedThemeProvider); // Obtén el índice actual
 
+      final themeColor = themeColors[selectedTheme]; // Selección del color
+
       final pageTheme =
           await _myPageTheme(format, selectedTheme); // Pasa el índice
-      final themeColor = themeColors[themeIndex];
+
       pdf.addPage(
         pw.MultiPage(
           pageTheme: pageTheme,
@@ -216,7 +217,10 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Generar CV')),
+      appBar: AppBar(
+        title: const Text('Generar CV'),
+        centerTitle: true,
+      ),
       body: FutureBuilder<UserCv?>(
         future: cvFuture,
         builder: (context, snapshot) {
@@ -226,164 +230,92 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null) {
             return const Center(
-                child: Text('No se encontró información del usuario'));
+              child: Text('No se encontró información del usuario'),
+            );
           }
 
           final userCv = snapshot.data!;
-          print(userCv.id);
+
           return SingleChildScrollView(
-            controller: ScrollController(),
-            scrollDirection: Axis.vertical,
+            padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  width: 200,
-                  child: Card(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Datos Personales',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Text('${userCv.name}, ${userCv.age} años'),
-                        Text(userCv.email),
-                        Text(userCv.phoneNumber),
-                        Text(userCv.address),
-                      ],
-                    ),
-                  ),
-                ),
-                if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
-                  SizedBox(
-                    width: 200,
-                    child: Card(
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Educación',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ...(userCv.studies.toList()).map(
-                                  (study) {
-                                    return Column(
-                                      children: [
-                                        Text(
-                                          study.institutionName,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        if (study.isGraduated == true)
-                                          const Text(
-                                            'Secundario Completo',
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                ...(userCv.highStudies.toList()).map(
-                                  (study) {
-                                    return Column(
-                                      children: [
-                                        Text(
-                                          study.institutionName,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(study.degree),
-                                        if (study.isGraduated != true)
-                                          const Text(
-                                            'En curso',
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(
-                  width: 200,
-                  child: Card(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Experiencia Laboral',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Column(
-                          children: userCv.experiences.map((e) {
-                            return Column(
-                              children: [
-                                Text(
-                                    '${e.companyName} (${e.startDate} - ${e.endDate})'),
-                                Text(e.position),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 200,
-                  child: Card(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Conocimientos',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Column(
-                          children: userCv.skills.map((e) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(e.name),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Avatar
                 if (_imageBytes != null && _imageBytes!.isNotEmpty)
                   CircleAvatar(
                     radius: 80,
                     backgroundImage: MemoryImage(_imageBytes!),
                   ),
-                const SizedBox(
-                  height: 80, // Altura específica para `ThemePreview`
-                  child: ThemePreview(), // Muestra la vista previa de tema
+                const SizedBox(height: 16),
+
+                // Datos personales
+                _buildCard(
+                  context,
+                  title: 'Datos Personales',
+                  children: [
+                    Text('${userCv.name}, ${userCv.age} años'),
+                    Text(userCv.email),
+                    Text(userCv.phoneNumber),
+                    Text(userCv.address),
+                  ],
                 ),
-                const SizedBox(height: 20),
+
+                // Educación
+                if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
+                  _buildCard(
+                    context,
+                    title: 'Educación',
+                    children: [
+                      ...userCv.studies.map((study) => ListTile(
+                            title: Text(study.institutionName),
+                            subtitle: Text(
+                                study.isGraduated ? "Graduado" : "En curso"),
+                          )),
+                      ...userCv.highStudies.map((highStudy) => ListTile(
+                            title: Text(highStudy.institutionName),
+                            subtitle: Text(highStudy.degree),
+                          )),
+                    ],
+                  ),
+
+                // Experiencia laboral
+                if (userCv.experiences.isNotEmpty)
+                  _buildCard(
+                    context,
+                    title: 'Experiencia Laboral',
+                    children: userCv.experiences.map((e) {
+                      return ListTile(
+                        title: Text(e.companyName),
+                        subtitle: Text('${e.startDate} - ${e.endDate}'),
+                        trailing: Text(e.position),
+                      );
+                    }).toList(),
+                  ),
+
+                // Conocimientos
+                if (userCv.skills.isNotEmpty)
+                  _buildCard(
+                    context,
+                    title: 'Conocimientos',
+                    children: userCv.skills.map((skill) {
+                      return ListTile(
+                        title: Text(skill.name),
+                      );
+                    }).toList(),
+                  ),
+
+                // Botones de acciones
+                const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
                       onPressed: pickImage,
                       icon: const Icon(Icons.browse_gallery),
                       label: const Text('Seleccionar Imagen'),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 16),
                     ElevatedButton.icon(
                       onPressed: takePicture,
                       icon: const Icon(Icons.camera_alt),
@@ -391,6 +323,12 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                const SizedBox(
+                  height: 250,
+                  child: ThemePreview(),
+                ),
+                // Botón para generar PDF
                 ElevatedButton(
                   onPressed: () async {
                     final filePath = await generatePdf(
@@ -400,16 +338,44 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     if (result.type != ResultType.done) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('No se pudo abrir el PDF')),
+                          content: Text('No se pudo abrir el PDF'),
+                        ),
                       );
                     }
                   },
-                  child: const Text('Generar'),
+                  child: const Text('Generar CV'),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context,
+      {required String title, required List<Widget> children}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const Divider(),
+            ...children,
+          ],
+        ),
       ),
     );
   }
