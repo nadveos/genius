@@ -1,4 +1,5 @@
 import 'package:cvgenius/config/router/router.dart';
+import 'package:cvgenius/config/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,9 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: AppTheme().getConfig(),
       routerConfig: approuter,
     );
   }

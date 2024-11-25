@@ -3,12 +3,14 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cvgenius/config/router/router.dart';
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/widgets/pdf_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:open_file/open_file.dart';
@@ -133,7 +135,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                           flex: 1,
                           child: pw.Align(
                             alignment: pw.Alignment.topRight,
-                            child: pw.ClipOval(
+                            child: pw.ClipRRect(
+                              horizontalRadius: 50,
                               child: pw.Image(pw.MemoryImage(_imageBytes!),
                                   width: 100, height: 100),
                             ),
@@ -392,6 +395,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                   onPressed: () async {
                     final filePath = await generatePdf(
                         userCv, selectedTheme, PdfPageFormat.a4);
+                    context.pop(context);
                     final result = await OpenFile.open(filePath);
                     if (result.type != ResultType.done) {
                       ScaffoldMessenger.of(context).showSnackBar(
