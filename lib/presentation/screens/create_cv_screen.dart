@@ -55,13 +55,13 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final List<Map<String, dynamic>> _educacion = [];
   bool _poseeTituloSecundario = false;
   bool _secundarioGuardado = false;
+  bool _terciarioGuardado = false;
   String _nivelSecundario = 'Secundario Completo';
 
   //skills controllers
   final TextEditingController _conocimientoController = TextEditingController();
+  String _nivelController = 'Basico';
   final List<Map<String, String>> _conocimientos = [];
-
- 
 
   void _guardarCV() async {
     // Crear la instancia de UserCv
@@ -72,7 +72,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       phoneNumber: _telefonoController.text,
       address: _direccionController.text,
       nationality: _nationalityController.text,
-       // Puedes completar esto según tus necesidades
+      // Puedes completar esto según tus necesidades
     );
 
     // Crear listas de experiencias, estudios y habilidades
@@ -108,7 +108,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     final skills = _conocimientos
         .map((c) => Skill()
           ..name = c['conocimiento'] ?? ''
-          ..level = '') // Puedes ajustar el nivel aquí según corresponda
+          ..level = c['nivel'] ??
+              '') // Puedes ajustar el nivel aquí según corresponda
         .toList();
 
     final userCvRepository = ref.read(isarUserProvider);
@@ -160,7 +161,6 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       _step4(),
       _step5(),
       _step6(),
-    
     ];
     bool validateStep(int index) {
       switch (index) {
@@ -178,7 +178,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           return _highEducacion.isNotEmpty || _highEducacion.isEmpty;
         case 6:
           return _conocimientos.isNotEmpty;
-        
+
         // No requiere validación
         default:
           return false;
@@ -241,9 +241,6 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     );
   }
 
-  
-
-
   Step _step6() {
     return Step(
       title: const Text('Otros Conocimientos'),
@@ -271,12 +268,34 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                 return null;
               },
             ),
+            DropdownButtonFormField<String>(
+              value: _nivelController,
+              decoration: const InputDecoration(labelText: 'Nivel'),
+              items: const [
+                DropdownMenuItem(
+                  value: 'Basico',
+                  child: Text('Basico'),
+                ),
+                DropdownMenuItem(
+                  value: 'Intermedio',
+                  child: Text('Intermedio'),
+                ),
+                DropdownMenuItem(value: 'Avanzado', child: Text('Avanzado')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _nivelController = value!;
+                });
+              },
+            ),
             ElevatedButton(
               onPressed: () {
                 if (_formKeys[6].currentState!.validate()) {
                   setState(() {
                     _conocimientos.add({
                       'conocimiento': _conocimientoController.text,
+                      'nivel': _nivelController
+                          , // Puedes ajustar el nivel aquí según corresponda
                     });
                     _conocimientoController.clear();
                     _formKeys[6].currentState!.reset();
@@ -308,17 +327,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   ),
                 ],
               ),
-            TextFormField(
-              controller: _institutioHighController,
-              decoration:
-                  const InputDecoration(labelText: 'Institución de Estudios'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el nombre de la institución';
-                }
-                return null;
-              },
-            ),
+            if (!_terciarioGuardado)
+              TextFormField(
+                controller: _institutioHighController,
+                decoration:
+                    const InputDecoration(labelText: 'Institución de Estudios'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese el nombre de la institución';
+                  }
+                  return null;
+                },
+              ),
             TextFormField(
               controller: _tituloTerciarioController,
               decoration:
@@ -383,7 +403,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     print(_endHighStudyController.text);
                     print(_poseeTituloTerciario);
                     _highEducacion.add(highEducacion);
-
+                    _terciarioGuardado = true;
                     _tituloTerciarioController.clear();
                     _institutioHighController.clear();
                     _startHighStudyController.clear();

@@ -20,3 +20,12 @@ final selectedThemeProvider = StateNotifierProvider<SelectedThemeNotifier, int>(
   (ref) => SelectedThemeNotifier(),
 );
 
+class ThemeNotifier extends StateNotifier<bool> {
+  ThemeNotifier() : super(false);
+
+  void toggleTheme() => state = !state;
+}
+
+final themeProvider = StateNotifierProvider<ThemeNotifier, bool>(
+  (ref) => ThemeNotifier(),
+);

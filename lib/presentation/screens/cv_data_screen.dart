@@ -90,20 +90,26 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: <pw.Widget>[
-                            pw.Text(userCv.name.toUpperCase(),
-                                textScaleFactor: 2,
-                                style: pw.Theme.of(context)
-                                    .defaultTextStyle
-                                    .copyWith(fontWeight: pw.FontWeight.bold)),
-                            pw.Text('${userCv.age} años',
-                                textScaleFactor: 1.5,
-                                style: pw.Theme.of(context)
-                                    .defaultTextStyle
-                                    .copyWith(fontWeight: pw.FontWeight.bold)),
+                            pw.Text(
+                              userCv.name.toUpperCase(),
+                              textScaleFactor: 2,
+                              style: pw.Theme.of(context)
+                                  .defaultTextStyle
+                                  .copyWith(fontWeight: pw.FontWeight.bold),
+                            ),
+                            pw.Text(
+                              '${userCv.age} años',
+                              textScaleFactor: 1.5,
+                              style: pw.Theme.of(context)
+                                  .defaultTextStyle
+                                  .copyWith(fontWeight: pw.FontWeight.bold),
+                            ),
                             pw.Padding(
-                                padding: const pw.EdgeInsets.only(top: 10)),
+                              padding: const pw.EdgeInsets.only(top: 10),
+                            ),
                             pw.Padding(
-                                padding: const pw.EdgeInsets.only(top: 20)),
+                              padding: const pw.EdgeInsets.only(top: 20),
+                            ),
                             pw.Row(
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               mainAxisAlignment:
@@ -136,10 +142,16 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                           flex: 1,
                           child: pw.Align(
                             alignment: pw.Alignment.topRight,
-                            child: pw.ClipRRect(
-                              horizontalRadius: 50,
-                              child: pw.Image(pw.MemoryImage(_imageBytes!),
-                                  width: 100, height: 100),
+                            child: pw.Container(
+                              width: 150,
+                              height: 150,
+                              decoration: pw.BoxDecoration(
+                                shape: pw.BoxShape.circle,
+                                image: pw.DecorationImage(
+                                  image: pw.MemoryImage(_imageBytes!),
+                                  fit: pw.BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -166,11 +178,14 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               title: userCv.studies.map((study) {
                 // Verificar el nivel de estudio según el contenido
                 if (study.institutionName != null && study.degree != null) {
-                  return study.institutionName;
+                  return study.institutionName.toUpperCase();
                 } else if (study.institutionName != null) {
-                  return study.institutionName;
+                  return study.institutionName.toUpperCase();
                 } else if (study.degree != null) {
                   return study.degree;
+                } else if (study.isGraduated != null &&
+                    study.isGraduated == true) {
+                  return 'Secundario Completo';
                 } else {
                   return 'Información no disponible';
                 }
@@ -184,11 +199,14 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 color: themeColor,
                 title: userCv.highStudies.map((study) {
                   if (study.institutionName != null && study.degree != null) {
-                    return study.institutionName;
+                    return study.institutionName.toUpperCase();
                   } else if (study.institutionName != null) {
-                    return study.institutionName;
+                    return study.institutionName.toUpperCase();
                   } else if (study.degree != null) {
-                    return study.degree;
+                    return study.degree.toLowerCase();
+                  } else if (study.isGraduated != null &&
+                      study.isGraduated == true) {
+                    return 'Graduado';
                   } else {
                     return 'Información no disponible';
                   }
@@ -244,7 +262,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 // Avatar
                 if (_imageBytes != null && _imageBytes!.isNotEmpty)
                   CircleAvatar(
-                    radius: 80,
+                    radius: 150,
                     backgroundImage: MemoryImage(_imageBytes!),
                   ),
                 const SizedBox(height: 16),
@@ -268,13 +286,16 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     title: 'Educación',
                     children: [
                       ...userCv.studies.map((study) => ListTile(
-                            title: Text(study.institutionName),
-                            subtitle: Text(
-                                study.isGraduated ? "Graduado" : "En curso"),
+                            title: Text(study.institutionName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800),),
+                            subtitle: Text(study.isGraduated
+                                ? "Secundario Completo"
+                                : "En curso"),
                           )),
                       ...userCv.highStudies.map((highStudy) => ListTile(
-                            title: Text(highStudy.institutionName),
-                            subtitle: Text(highStudy.degree),
+                            title:
+                                Text(highStudy.institutionName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800),),
+                            subtitle: Text(
+                                '${highStudy.degree} ${highStudy.isGraduated ? "Graduado" : "En curso"}'),
                           )),
                     ],
                   ),
@@ -286,7 +307,12 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     title: 'Experiencia Laboral',
                     children: userCv.experiences.map((e) {
                       return ListTile(
-                        title: Text(e.companyName),
+                        title: Text(
+                          e.companyName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         subtitle: Text('${e.startDate} - ${e.endDate}'),
                         trailing: Text(e.position),
                       );
@@ -300,28 +326,55 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     title: 'Conocimientos',
                     children: userCv.skills.map((skill) {
                       return ListTile(
-                        title: Text(skill.name),
+                        title: Text(skill.name, style: const TextStyle(fontWeight: FontWeight.w800),),
+                        subtitle: Text(skill.level),
                       );
                     }).toList(),
                   ),
 
                 // Botones de acciones
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: pickImage,
-                      icon: const Icon(Icons.browse_gallery),
-                      label: const Text('Seleccionar Imagen'),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: takePicture,
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Tomar Foto'),
-                    ),
-                  ],
+                
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                    return Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                      
+                      borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                        ListTile(
+                          leading: const Icon(Icons.camera_alt),
+                          title: const Text('Tomar Foto'),
+                          onTap: () {
+                          context.pop(context);
+                          takePicture();
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.photo_library),
+                          title: const Text('Seleccionar de la Galería'),
+                          onTap: () {
+                          context.pop(context);
+                          pickImage();
+                          },
+                        ),
+                        ],
+                      ),
+                      ),
+                    );
+                    },
+                  );
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Añadir Foto'),
                 ),
                 const SizedBox(height: 16),
                 const SizedBox(

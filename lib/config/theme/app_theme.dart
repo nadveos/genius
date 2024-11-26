@@ -1,18 +1,51 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-
-
-ThemeData getConfig()=>
-  ThemeData(
+  ThemeData getConfigLight() => ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue, brightness: Brightness.light),
+        useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: Colors.blue,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Colors.blue,
+          textTheme: ButtonTextTheme.primary,
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black),
+          bodyMedium: TextStyle(color: Colors.black54),
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          modalBackgroundColor: Colors.white,
+        ),
+        
+      );
+  ThemeData getConfigDark() => ThemeData(
+  colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue, brightness: Brightness.dark),
+  useMaterial3: true,
+  brightness: Brightness.dark,
+  primaryColor: Colors.blue,
   appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    iconTheme: IconThemeData(
-      color: Colors.black,
-    ),
+    backgroundColor: Colors.black,
+    foregroundColor: Colors.white,
   ),
-  scaffoldBackgroundColor: Colors.grey[300],
-    colorSchemeSeed: const Color(0xff1a1a1a),
+  buttonTheme: const ButtonThemeData(
+    buttonColor: Colors.blue,
+    textTheme: ButtonTextTheme.primary,
+  ),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(color: Colors.white),
+    bodyMedium: TextStyle(color: Colors.white70),
+  ),
+  bottomSheetTheme: const BottomSheetThemeData(
+    backgroundColor: Colors.black,
+    modalBackgroundColor: Colors.black,
+  ),
   );
 }

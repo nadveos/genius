@@ -20,10 +20,21 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userCvAsyncValue = ref.watch(isarRealUserProvider);
+
+    void changeTheme() {
+      ref.read(themeProvider.notifier).toggleTheme();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis CVs'),
         actions: [
+          IconButton(onPressed: changeTheme, 
+            // ignore: unrelated_type_equality_checks
+            icon: ref.watch(themeProvider) == ThemeMode.dark
+              ? const Icon(Icons.dark_mode)
+              : const Icon(Icons.light_mode),
+          ),
           userCvAsyncValue.when(
             data: (data) {
               if (data.isNotEmpty) {
@@ -33,14 +44,13 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                     context.push('/create-cv');
                   },
                 );
-              }else{
+              } else {
                 return const SizedBox();
               }
             },
             loading: () => const SizedBox(),
             error: (error, stack) => const SizedBox(),
           ),
-          
         ],
       ),
       body: userCvAsyncValue.when(
@@ -74,14 +84,12 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
-                  print(cvList.length);
-                  print(cvList[index].id);
                   context.push('/cv-data/${cvList[index].id}');
                 },
               ),
               IconButton(
                 onPressed: () {
-                  ref.read(isarUserProvider).deleteCv(cvList[index].id); 
+                  ref.read(isarUserProvider).deleteCv(cvList[index].id);
                 },
                 icon: const Icon(Icons.delete),
               ),
