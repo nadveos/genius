@@ -397,11 +397,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                       'hasta': _endHighStudyController.text,
                       'poseeTituloTerciario': _poseeTituloTerciario,
                     };
-                    print(_institutioHighController.text);
-                    print(_tituloTerciarioController.text);
-                    print(_startHighStudyController.text);
-                    print(_endHighStudyController.text);
-                    print(_poseeTituloTerciario);
+                  
                     _highEducacion.add(highEducacion);
                     _terciarioGuardado = true;
                     _tituloTerciarioController.clear();

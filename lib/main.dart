@@ -2,11 +2,14 @@ import 'package:cvgenius/config/router/router.dart';
 import 'package:cvgenius/config/theme/app_theme.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

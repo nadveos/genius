@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cvgenius/config/const/enviroment.dart';
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/widgets/pdf_theme_preview.dart';
@@ -38,7 +39,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   String? _generatedText;
 
   Future<String> generarCartaPresentacion(UserCv userCv) async {
-    const apiKey = 'AIzaSyB_8A5XzlEu92m-q_eXBPu_yXnvT0NzA_M';
+    final apiKey = Enviroment.gemini;
     final client = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
 
     final prompt = [
