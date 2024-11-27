@@ -40,11 +40,10 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
 
     // Define una lista de colores para diferentes temas
     final themeColors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
+      const Color.fromRGBO(205, 241, 231, 1),
+      const Color.fromRGBO(255, 223, 186,1),
+      const Color.fromRGBO(186, 225, 255,1),
+     
     ];
 
     // Asegúrate de que el índice de `selectedTheme` no exceda la longitud de `themeColors`

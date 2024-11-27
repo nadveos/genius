@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:open_file/open_file.dart';
@@ -34,6 +35,46 @@ class CvDataScreen extends ConsumerStatefulWidget {
 class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   Uint8List? _imageBytes;
   int selectedThemeIndex = 0;
+  String? _generatedText;
+
+  Future<String> generarCartaPresentacion(UserCv userCv) async {
+    const apiKey = 'AIzaSyB_8A5XzlEu92m-q_eXBPu_yXnvT0NzA_M';
+    final client = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+
+    final prompt = [
+      Content.text('''
+  
+  Genera una carta de presentación profesional para un currículum, basada en el siguiente perfil. 
+  Si falta información en algún apartado, ignóralo en el texto generado. Usa un lenguaje inclusivo y profesional, evitando referencias de género.
+  Omite un destinatario específico y solo deja el Estimado/a, omite la necesidad de tener que poner un nombre de destinatario.
+  NO INCLUYAS [DATOS POR COMPLETAR] en el texto generado. Si falta información, simplemente omítela.
+  Nombre: ${userCv.name}
+  Edad: ${userCv.age}
+  Experiencia laboral: 
+  ${userCv.experiences.map((e) => '- ${e.companyName} (${e.startDate} - ${e.endDate}): ${e.position}').join('\n')}
+
+  Formación académica:
+  ${userCv.studies.map((s) => '- ${s.institutionName}: ${s.degree} (${s.startDate} - ${s.endDate})').join('\n')}
+
+  Habilidades: ${userCv.skills.map((s) => s.name).join(', ')}
+
+  El texto debe ser general y adaptable para cualquier destinatario, evitando detalles innecesarios como nombres específicos o fechas exactas.
+  ''')
+    ];
+
+    final count = await client.countTokens(prompt);
+    print(count.totalTokens);
+    final response = await client.generateContent(prompt);
+    return response.text.toString();
+  }
+
+  Future<void> generarCarta(UserCv userCv) async {
+    final carta = await generarCartaPresentacion(userCv);
+    setState(() {
+      _generatedText = carta;
+    });
+  }
+
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? file = await picker.pickImage(source: ImageSource.gallery);
@@ -62,7 +103,9 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   Widget build(BuildContext context) {
     final cvFuture = ref.watch(isarUserProvider).getUserCv(widget.userId);
     final selectedTheme = ref.read(selectedThemeProvider);
+    //creacion de carta de presentación
 
+    //creacion del pdf
     Future<String> generatePdf(
         UserCv userCv, int themeIndex, PdfPageFormat format) async {
       final pdf = pw.Document(title: userCv.name, author: 'CVGenius');
@@ -74,7 +117,18 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
 
       final pageTheme =
           await _myPageTheme(format, selectedTheme); // Pasa el índice
-
+      pdf.addPage(pw.Page(
+          pageTheme: pageTheme,
+          build: (pw.Context context) {
+            if (_generatedText != null) {
+              return pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 10),
+                child: pw.Text(_generatedText!),
+              );
+            } else {
+              return pw.Container();
+            }
+          }));
       pdf.addPage(
         pw.MultiPage(
           pageTheme: pageTheme,
@@ -160,67 +214,75 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 ),
               ],
             ),
+            pw.Divider(color: themeColor),
             if (userCv.experiences.isNotEmpty)
               _Category(title: 'Experiencia Laboral', color: themeColor),
-            _Block(
-              color: themeColor,
-              title: userCv.experiences.map((e) {
-                return '${e.companyName.toUpperCase()} (${e.startDate} - ${e.endDate})\n ${e.position}';
-              }).join('\n'),
-              desc: userCv.experiences.map((e) {
-                return e.description;
-              }).join('\n'),
-            ),
+            ...userCv.experiences.map((e) {
+              return _Block(
+                color: themeColor,
+                title:
+                    '${e.companyName.toUpperCase()} (${e.startDate} - ${e.endDate})',
+                desc: '${e.position}\n${e.description}',
+              );
+            }),
             if (userCv.studies.isNotEmpty)
               _Category(title: 'Educación', color: themeColor),
-            _Block(
-              color: themeColor,
-              title: userCv.studies.map((study) {
-                // Verificar el nivel de estudio según el contenido
-                if (study.institutionName != null && study.degree != null) {
-                  return study.institutionName.toUpperCase();
-                } else if (study.institutionName != null) {
-                  return study.institutionName.toUpperCase();
-                } else if (study.degree != null) {
-                  return study.degree;
-                } else if (study.isGraduated != null &&
-                    study.isGraduated == true) {
-                  return 'Secundario Completo';
-                } else {
-                  return 'Información no disponible';
-                }
-              }).join('\n'),
-              desc: userCv.studies.map((study) {
-                return '${study.degree} (${study.startDate} - ${study.endDate})';
-              }).join('\n'),
-            ),
+            ...userCv.studies.map((study) {
+              // Verificar el nivel de estudio según el contenido
+              if (study.institutionName != null && study.degree != null) {
+                return _Block(
+                  color: themeColor,
+                  title: study.institutionName.toUpperCase(),
+                  desc:
+                      '${study.degree} (${study.startDate} - ${study.endDate})',
+                );
+              } else if (study.institutionName != null) {
+                return _Block(
+                  color: themeColor,
+                  title: study.institutionName.toUpperCase(),
+                  desc: '${study.startDate} - ${study.endDate}',
+                );
+              } else if (study.degree != null) {
+                return _Block(
+                  color: themeColor,
+                  title: study.degree,
+                  desc: '${study.startDate} - ${study.endDate}',
+                );
+              } else if (study.isGraduated != null &&
+                  study.isGraduated == true) {
+                return _Block(
+                  color: themeColor,
+                  title: 'Secundario Completo',
+                  desc: '${study.startDate} - ${study.endDate}',
+                );
+              } else {
+                return _Block(
+                  color: themeColor,
+                  title: 'Información no disponible',
+                  desc: '',
+                );
+              }
+            }),
             if (userCv.highStudies.isNotEmpty)
-              _Block(
-                color: themeColor,
-                title: userCv.highStudies.map((study) {
-                  if (study.institutionName != null && study.degree != null) {
-                    return study.institutionName.toUpperCase();
-                  } else if (study.institutionName != null) {
-                    return study.institutionName.toUpperCase();
-                  } else if (study.degree != null) {
-                    return study.degree.toLowerCase();
-                  } else if (study.isGraduated != null &&
-                      study.isGraduated == true) {
-                    return 'Graduado';
-                  } else {
-                    return 'Información no disponible';
-                  }
-                }).join('\n'),
-                desc: userCv.highStudies.map((study) {
-                  return '${study.degree} (${study.startDate} - ${study.endDate})';
-                }).join('\n'),
+              ...userCv.highStudies.map(
+                (study) {
+                  return _Block(
+                    color: themeColor,
+                    title: study.institutionName.toUpperCase(),
+                    desc:
+                        '${study.degree} (${study.startDate} - ${study.endDate})',
+                  );
+                },
               ),
             if (userCv.skills.isNotEmpty)
               _Category(title: 'Otros Conocimientos', color: themeColor),
-            _Block1(
-              color: themeColor,
-              title: userCv.skills.map((e) => e.name.toUpperCase()).join(', '),
-            ),
+            ...userCv.skills.map((skill) {
+              return _Block(
+                color: themeColor,
+                title: skill.name,
+                desc: skill.level,
+              );
+            }),
           ],
         ),
       );
@@ -286,14 +348,21 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     title: 'Educación',
                     children: [
                       ...userCv.studies.map((study) => ListTile(
-                            title: Text(study.institutionName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800),),
+                            title: Text(
+                              study.institutionName.toUpperCase(),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w800),
+                            ),
                             subtitle: Text(study.isGraduated
                                 ? "Secundario Completo"
                                 : "En curso"),
                           )),
                       ...userCv.highStudies.map((highStudy) => ListTile(
-                            title:
-                                Text(highStudy.institutionName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800),),
+                            title: Text(
+                              highStudy.institutionName.toUpperCase(),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w800),
+                            ),
                             subtitle: Text(
                                 '${highStudy.degree} ${highStudy.isGraduated ? "Graduado" : "En curso"}'),
                           )),
@@ -308,7 +377,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     children: userCv.experiences.map((e) {
                       return ListTile(
                         title: Text(
-                          e.companyName,
+                          e.companyName.toUpperCase(),
                           style: const TextStyle(
                             fontWeight: FontWeight.w800,
                           ),
@@ -326,52 +395,55 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     title: 'Conocimientos',
                     children: userCv.skills.map((skill) {
                       return ListTile(
-                        title: Text(skill.name, style: const TextStyle(fontWeight: FontWeight.w800),),
+                        title: Text(
+                          skill.name,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
                         subtitle: Text(skill.level),
                       );
                     }).toList(),
                   ),
 
                 // Botones de acciones
-                
+
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                    return Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                      
-                      borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                        ListTile(
-                          leading: const Icon(Icons.camera_alt),
-                          title: const Text('Tomar Foto'),
-                          onTap: () {
-                          context.pop(context);
-                          takePicture();
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.photo_library),
-                          title: const Text('Seleccionar de la Galería'),
-                          onTap: () {
-                          context.pop(context);
-                          pickImage();
-                          },
-                        ),
-                        ],
-                      ),
-                      ),
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.camera_alt),
+                                  title: const Text('Tomar Foto'),
+                                  onTap: () {
+                                    context.pop(context);
+                                    takePicture();
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.photo_library),
+                                  title:
+                                      const Text('Seleccionar de la Galería'),
+                                  onTap: () {
+                                    context.pop(context);
+                                    pickImage();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     );
-                    },
-                  );
                   },
                   icon: const Icon(Icons.camera_alt),
                   label: const Text('Añadir Foto'),
@@ -384,6 +456,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 // Botón para generar PDF
                 ElevatedButton(
                   onPressed: () async {
+                    await generarCarta(userCv);
                     final filePath = await generatePdf(
                         userCv, selectedTheme, PdfPageFormat.a4);
                     context.pop(context);
@@ -457,36 +530,36 @@ class _Category extends pw.StatelessWidget {
   }
 }
 
-class _Block1 extends pw.StatelessWidget {
-  final String title;
-  final PdfColor color;
-  _Block1({required this.title, required this.color});
-  @override
-  pw.Widget build(pw.Context context) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: <pw.Widget>[
-        pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: <pw.Widget>[
-              pw.Container(
-                width: 6,
-                height: 6,
-                margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
-                decoration: pw.BoxDecoration(
-                  color: color,
-                  shape: pw.BoxShape.circle,
-                ),
-              ),
-              pw.Text(title,
-                  style: pw.Theme.of(context)
-                      .defaultTextStyle
-                      .copyWith(fontWeight: pw.FontWeight.bold)),
-            ]),
-      ],
-    );
-  }
-}
+// class _Block1 extends pw.StatelessWidget {
+//   final String title;
+//   final PdfColor color;
+//   _Block1({required this.title, required this.color});
+//   @override
+//   pw.Widget build(pw.Context context) {
+//     return pw.Column(
+//       crossAxisAlignment: pw.CrossAxisAlignment.start,
+//       children: <pw.Widget>[
+//         pw.Row(
+//             crossAxisAlignment: pw.CrossAxisAlignment.start,
+//             children: <pw.Widget>[
+//               pw.Container(
+//                 width: 6,
+//                 height: 6,
+//                 margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
+//                 decoration: pw.BoxDecoration(
+//                   color: color,
+//                   shape: pw.BoxShape.circle,
+//                 ),
+//               ),
+//               pw.Text(title,
+//                   style: pw.Theme.of(context)
+//                       .defaultTextStyle
+//                       .copyWith(fontWeight: pw.FontWeight.bold)),
+//             ]),
+//       ],
+//     );
+//   }
+// }
 
 class _Block extends pw.StatelessWidget {
   final String title;
@@ -541,8 +614,6 @@ class _Block extends pw.StatelessWidget {
 
 Future<pw.PageTheme> _myPageTheme(
     PdfPageFormat format, int selectedThemeIndex) async {
-  print('Índice del tema seleccionado en _myPageTheme: $selectedThemeIndex');
-
   final themeSvgs = [
     'assets/svg/r1.svg',
     'assets/svg/r2.svg',
@@ -550,7 +621,6 @@ Future<pw.PageTheme> _myPageTheme(
   ];
 
   final bgShapePath = themeSvgs[selectedThemeIndex];
-  print('Ruta del SVG seleccionado: $bgShapePath');
 
   final bgShape = await rootBundle.loadString(bgShapePath);
 
