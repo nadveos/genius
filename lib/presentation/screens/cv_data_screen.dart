@@ -9,6 +9,7 @@ import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/widgets/pdf_theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -38,11 +39,11 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   int selectedThemeIndex = 0;
   String? _generatedText;
 
-  Future<String> generarCartaPresentacion(UserCv userCv) async {
+  Future<String> generarCartaPresentacion(UserCv userCv, Locale locale) async {
     final apiKey = Enviroment.gemini;
     final client = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
-
-    final prompt = [
+    final isEnglish = locale.languageCode == 'en';
+    final promptSpanish = [
       Content.text('''
   
   Genera una carta de presentación profesional para un currículum, basada en el siguiente perfil. 
@@ -62,15 +63,36 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   El texto debe ser general y adaptable para cualquier destinatario, evitando detalles innecesarios como nombres específicos o fechas exactas.
   ''')
     ];
+    final promptEnglish = [
+      Content.text('''
+  Generate a professional cover letter for a resume, based on the following profile.
+  If any section lacks information, ignore it in the generated text. Use inclusive and professional language, avoiding gender-specific references.
+  Leave the greeting as "Dear" without specifying a recipient's name.
+  DO NOT INCLUDE [MISSING DATA] in the generated text. If information is missing, simply omit it.
+  Name: ${userCv.name}
+  Age: ${userCv.age}
+  Work Experience: 
+  ${userCv.experiences.map((e) => '- ${e.companyName} (${e.startDate} - ${e.endDate}): ${e.position}').join('\n')}
 
+  Academic Background:
+  ${userCv.studies.map((s) => '- ${s.institutionName}: ${s.degree} (${s.startDate} - ${s.endDate})').join('\n')}
+
+  Skills: ${userCv.skills.map((s) => s.name).join(', ')}
+
+  The text should be general and adaptable to any recipient, avoiding unnecessary details such as specific names or exact dates.
+  ''')
+    ];
+    var prompt = isEnglish ? promptEnglish : promptSpanish;
     final count = await client.countTokens(prompt);
     print(count.totalTokens);
     final response = await client.generateContent(prompt);
+    print(response.usageMetadata);
     return response.text.toString();
   }
 
   Future<void> generarCarta(UserCv userCv) async {
-    final carta = await generarCartaPresentacion(userCv);
+    final locale = ref.read(localeProvider);
+    final carta = await generarCartaPresentacion(userCv, locale);
     setState(() {
       _generatedText = carta;
     });
@@ -108,14 +130,18 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
 
     //creacion del pdf
     Future<String> generatePdf(
-        UserCv userCv, int themeIndex, PdfPageFormat format) async {
-      final pdf = pw.Document(title: userCv.name, author: 'CVGenius');
+        UserCv userCv, int themeIndex, PdfPageFormat format, BuildContext context) async {
+      final pdf = pw.Document(
+          title: userCv.name,
+          author: 'CV Genius',
+          creator: 'CV Genius',
+          subject: 'CV Genius - Curriculum Vitae');
 
       final selectedTheme =
           ref.read(selectedThemeProvider); // Obtén el índice actual
 
       final themeColor = themeColors[selectedTheme]; // Selección del color
-
+      final applocalizations = AppLocalizations.of(context);
       final pageTheme =
           await _myPageTheme(format, selectedTheme); // Pasa el índice
       pdf.addPage(pw.Page(
@@ -153,7 +179,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                   .copyWith(fontWeight: pw.FontWeight.bold),
                             ),
                             pw.Text(
-                              '${userCv.age} años',
+                              '${userCv.age} ${applocalizations!.anios}',
                               textScaleFactor: 1.5,
                               style: pw.Theme.of(context)
                                   .defaultTextStyle
@@ -217,7 +243,10 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
             ),
             pw.Divider(color: themeColor),
             if (userCv.experiences.isNotEmpty)
-              _Category(title: 'Experiencia Laboral', color: themeColor),
+              _Category(
+                  title:
+                      applocalizations.experiencia,
+                  color: themeColor),
             ...userCv.experiences.map((e) {
               return _Block(
                 color: themeColor,
@@ -227,7 +256,9 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               );
             }),
             if (userCv.studies.isNotEmpty)
-              _Category(title: 'Educación', color: themeColor),
+              _Category(
+                  title: applocalizations.estudios,
+                  color: themeColor),
             ...userCv.studies.map((study) {
               // Verificar el nivel de estudio según el contenido
               if (study.institutionName != null && study.degree != null) {
@@ -253,13 +284,14 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                   study.isGraduated == true) {
                 return _Block(
                   color: themeColor,
-                  title: 'Secundario Completo',
+                  title:
+                      applocalizations.secCompleto,
                   desc: '${study.startDate} - ${study.endDate}',
                 );
               } else {
                 return _Block(
                   color: themeColor,
-                  title: 'Información no disponible',
+                  title: applocalizations.msg2,
                   desc: '',
                 );
               }
@@ -276,7 +308,10 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 },
               ),
             if (userCv.skills.isNotEmpty)
-              _Category(title: 'Otros Conocimientos', color: themeColor),
+              _Category(
+                  title: applocalizations
+                      .conocimientos,
+                  color: themeColor),
             ...userCv.skills.map((skill) {
               return _Block(
                 color: themeColor,
@@ -299,7 +334,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Generar CV'),
+        title: Text(AppLocalizations.of(context)!.generarCv),
         centerTitle: true,
       ),
       body: FutureBuilder<UserCv?>(
@@ -310,8 +345,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(
-              child: Text('No se encontró información del usuario'),
+            return Center(
+              child: Text(AppLocalizations.of(context)!.msg2),
             );
           }
 
@@ -333,9 +368,10 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 // Datos personales
                 _buildCard(
                   context,
-                  title: 'Datos Personales',
+                  title: AppLocalizations.of(context)!.datosPersonales,
                   children: [
-                    Text('${userCv.name}, ${userCv.age} años'),
+                    Text(
+                        '${userCv.name}, ${userCv.age} ${AppLocalizations.of(context)!.anios}'),
                     Text(userCv.email),
                     Text(userCv.phoneNumber),
                     Text(userCv.address),
@@ -346,7 +382,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
                   _buildCard(
                     context,
-                    title: 'Educación',
+                    title: AppLocalizations.of(context)!.estudiosRealizados,
                     children: [
                       ...userCv.studies.map((study) => ListTile(
                             title: Text(
@@ -355,8 +391,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                   const TextStyle(fontWeight: FontWeight.w800),
                             ),
                             subtitle: Text(study.isGraduated
-                                ? "Secundario Completo"
-                                : "En curso"),
+                                ? AppLocalizations.of(context)!.graduado
+                                : AppLocalizations.of(context)!.enCurso),
                           )),
                       ...userCv.highStudies.map((highStudy) => ListTile(
                             title: Text(
@@ -365,7 +401,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                   const TextStyle(fontWeight: FontWeight.w800),
                             ),
                             subtitle: Text(
-                                '${highStudy.degree} ${highStudy.isGraduated ? "Graduado" : "En curso"}'),
+                                '${highStudy.degree} ${highStudy.isGraduated} ? ${AppLocalizations.of(context)!.graduado} : ${AppLocalizations.of(context)!.enCurso}}'),
                           )),
                     ],
                   ),
@@ -374,7 +410,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 if (userCv.experiences.isNotEmpty)
                   _buildCard(
                     context,
-                    title: 'Experiencia Laboral',
+                    title: AppLocalizations.of(context)!.experienciaLaboral,
                     children: userCv.experiences.map((e) {
                       return ListTile(
                         title: Text(
@@ -393,7 +429,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 if (userCv.skills.isNotEmpty)
                   _buildCard(
                     context,
-                    title: 'Conocimientos',
+                    title: AppLocalizations.of(context)!.conocimientos,
                     children: userCv.skills.map((skill) {
                       return ListTile(
                         title: Text(
@@ -422,21 +458,24 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                ListTile(
-                                  leading: const Icon(Icons.camera_alt),
-                                  title: const Text('Tomar Foto'),
-                                  onTap: () {
-                                    context.pop(context);
-                                    takePicture();
-                                  },
-                                ),
+                                
                                 ListTile(
                                   leading: const Icon(Icons.photo_library),
-                                  title:
-                                      const Text('Seleccionar de la Galería'),
+                                  title: Text(AppLocalizations.of(context)!
+                                      .seleccionarFoto),
                                   onTap: () {
                                     context.pop(context);
                                     pickImage();
+                                  },
+                                ),
+                                if(Platform.isAndroid)
+                                ListTile(
+                                  leading: const Icon(Icons.camera_alt),
+                                  title: Text(
+                                      AppLocalizations.of(context)!.tomarFoto),
+                                  onTap: () {
+                                    context.pop(context);
+                                    takePicture();
                                   },
                                 ),
                               ],
@@ -447,7 +486,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     );
                   },
                   icon: const Icon(Icons.camera_alt),
-                  label: const Text('Añadir Foto'),
+                  label: Text(AppLocalizations.of(context)!.aniadirFoto),
                 ),
                 const SizedBox(height: 16),
                 const SizedBox(
@@ -459,18 +498,19 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                   onPressed: () async {
                     await generarCarta(userCv);
                     final filePath = await generatePdf(
-                        userCv, selectedTheme, PdfPageFormat.a4);
+                        userCv, selectedTheme, PdfPageFormat.a4, context);
                     context.pop(context);
                     final result = await OpenFile.open(filePath);
                     if (result.type != ResultType.done) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No se pudo abrir el PDF'),
+                        SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context)!.noSePudoAbrirPdf),
                         ),
                       );
                     }
                   },
-                  child: const Text('Generar CV'),
+                  child: Text(AppLocalizations.of(context)!.generarCv),
                 ),
               ],
             ),

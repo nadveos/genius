@@ -4,6 +4,7 @@ import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/screens/screens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,36 +28,51 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mis CVs'),
+        title: userCvAsyncValue.when(
+          data: (data) {
+            if (data.isNotEmpty) {
+              return Text(AppLocalizations.of(context)!.misCvs);
+            } else {
+              return const Text('CV Genius');
+            }
+          },
+          loading: () => const Text('CV Genius'),
+          error: (error, stack) => const Text('CV Genius'),
+        ),
         actions: [
-          IconButton(onPressed: changeTheme, 
+          IconButton(
+            onPressed: changeTheme,
             // ignore: unrelated_type_equality_checks
-            icon: ref.watch(themeProvider) == ThemeMode.dark
-              ? const Icon(Icons.dark_mode)
-              : const Icon(Icons.light_mode),
+            icon: ref.watch(themeProvider)
+                ? const Icon(Icons.dark_mode)
+                : const Icon(Icons.light_mode),
           ),
-          userCvAsyncValue.when(
-            data: (data) {
-              if (data.isNotEmpty) {
-                return IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    context.push('/create-cv');
-                  },
-                );
-              } else {
-                return const SizedBox();
-              }
+          Builder(
+            builder: (context) {
+              return userCvAsyncValue.when(
+                data: (data) {
+                  if (data.isNotEmpty) {
+                    return IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        context.push('/create-cv');
+                      },
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (error, stack) => const SizedBox.shrink(),
+              );
             },
-            loading: () => const SizedBox(),
-            error: (error, stack) => const SizedBox(),
           ),
         ],
       ),
       body: userCvAsyncValue.when(
         data: (cvList) {
           if (cvList.isEmpty) {
-            return const CreateCvScreen();
+            return const WelcomeScreen();
           } else {
             return _mycvs(cvList);
           }

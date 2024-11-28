@@ -3,8 +3,10 @@
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 
 class CreateCvScreen extends ConsumerStatefulWidget {
   const CreateCvScreen({super.key});
@@ -186,7 +188,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+    appBar: AppBar(
+    title: Text(AppLocalizations.of(context)!.crearCv),
+    ),
+
       body: Stepper(
         physics: const BouncingScrollPhysics(),
         type: StepperType.vertical,
@@ -203,8 +208,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             if (_index == steps.length - 1) {
               _guardarCV();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('CV guardado exitosamente'),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.cvGuardado),
                 ),
               );
               context.go('/'); // Navegar a la pantalla principal
@@ -228,11 +233,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               if (_index > 0)
                 TextButton(
                   onPressed: details.onStepCancel,
-                  child: const Text('Atrás'),
+                  child: Text(AppLocalizations.of(context)!.atras),
                 ),
               ElevatedButton(
                 onPressed: details.onStepContinue,
-                child: Text(isLastStep ? 'Guardar CV' : 'Continuar'),
+                child: Text(isLastStep ? AppLocalizations.of(context)!.guardarCv : AppLocalizations.of(context)!.continuar),
               ),
             ],
           );
@@ -243,7 +248,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step6() {
     return Step(
-      title: const Text('Otros Conocimientos'),
+      title: Text(AppLocalizations.of(context)!.otrosConocimientos),
       content: Form(
         key: _formKeys[6],
         child: Column(
@@ -259,28 +264,28 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               ),
             TextFormField(
               controller: _conocimientoController,
-              decoration: const InputDecoration(labelText: 'Conocimiento'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.conocimientos),
               validator: (value) {
                 if (_conocimientos.isEmpty &&
                     (value == null || value.isEmpty)) {
-                  return 'Por favor ingrese un conocimiento';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             DropdownButtonFormField<String>(
               value: _nivelController,
-              decoration: const InputDecoration(labelText: 'Nivel'),
-              items: const [
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.nivel),
+              items:  [
                 DropdownMenuItem(
                   value: 'Basico',
-                  child: Text('Basico'),
+                  child: Text(AppLocalizations.of(context)!.basico,),
                 ),
                 DropdownMenuItem(
                   value: 'Intermedio',
-                  child: Text('Intermedio'),
+                  child: Text(AppLocalizations.of(context)!.intermedio,),
                 ),
-                DropdownMenuItem(value: 'Avanzado', child: Text('Avanzado')),
+                DropdownMenuItem(value: 'Avanzado', child: Text(AppLocalizations.of(context)!.avanzado)),
               ],
               onChanged: (value) {
                 setState(() {
@@ -302,7 +307,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   });
                 }
               },
-              child: const Text('Guardar Conocimiento'),
+              child: Text(AppLocalizations.of(context)!.guardarConocimientos),
             ),
           ],
         ),
@@ -313,7 +318,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step5() {
     return Step(
-      title: const Text('Estudios Universitarios/Terciarios'),
+      title:  Text(AppLocalizations.of(context)!.estudiosUni),
       content: Form(
         key: _formKeys[5],
         child: Column(
@@ -331,10 +336,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               TextFormField(
                 controller: _institutioHighController,
                 decoration:
-                    const InputDecoration(labelText: 'Institución de Estudios'),
+                     InputDecoration(labelText: AppLocalizations.of(context)!.instiUni),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el nombre de la institución';
+                    return AppLocalizations.of(context)!.msg1;
                   }
                   return null;
                 },
@@ -342,39 +347,39 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             TextFormField(
               controller: _tituloTerciarioController,
               decoration:
-                  const InputDecoration(labelText: 'Título Obtenido/En Curso'),
+                   InputDecoration(labelText: AppLocalizations.of(context)!.tituloUni),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el título terciario';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _startHighStudyController,
-              decoration: const InputDecoration(labelText: 'Desde (año)'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el año de inicio';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _endHighStudyController,
-              decoration: const InputDecoration(labelText: 'Hasta (año)'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el año de finalización';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             Row(
               children: [
-                const Text('Posee título:'),
+                 Text(AppLocalizations.of(context)!.poseeTitulo),
                 Switch(
                   activeColor: Colors.green,
                   value: _poseeTituloTerciario,
@@ -409,7 +414,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   });
                 }
               },
-              child: const Text('Guardar Estudios Terciarios/Universitarios'),
+              child: Text(AppLocalizations.of(context)!.guardarEstudios,)
             ),
           ],
         ),
@@ -420,7 +425,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step4() {
     return Step(
-      title: const Text('Educación'),
+      title:  Text(AppLocalizations.of(context)!.estudiosSec),
       content: Form(
         key: _formKeys[4],
         child: Column(
@@ -433,17 +438,17 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   DropdownButtonFormField<String>(
                     value: _nivelSecundario,
                     decoration:
-                        const InputDecoration(labelText: 'Nivel Secundario'),
-                    items: const [
+                         InputDecoration(labelText: AppLocalizations.of(context)!.nivelSec),
+                    items:  [
                       DropdownMenuItem(
                           value: 'Secundario En Curso',
-                          child: Text('Secundario En Curso')),
+                          child: Text(AppLocalizations.of(context)!.secEnCurso)),
                       DropdownMenuItem(
                           value: 'Secundario Incompleto',
-                          child: Text('Secundario Incompleto')),
+                          child: Text(AppLocalizations.of(context)!.secIncompleto)),
                       DropdownMenuItem(
                           value: 'Secundario Completo',
-                          child: Text('Secundario Completo')),
+                          child: Text(AppLocalizations.of(context)!.secCompleto)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -453,22 +458,22 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   ),
                   TextFormField(
                     controller: _institutionController,
-                    decoration: const InputDecoration(
-                        labelText: 'Colegio o Institución'),
+                    decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.instiSec),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese el nombre de la institución';
+                        return AppLocalizations.of(context)!.msg1;
                       }
                       return null;
                     },
                   ),
                   TextFormField(
                     controller: _tituloSecundarioController,
-                    decoration: const InputDecoration(
-                        labelText: 'Título Obtenido/En Curso'),
+                    decoration:  InputDecoration(
+                        labelText: AppLocalizations.of(context)!.tituloSec),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese el título secundario';
+                        return AppLocalizations.of(context)!.msg1;
                       }
                       return null;
                     },
@@ -479,11 +484,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         TextFormField(
                           controller: _startStudyController,
                           decoration:
-                              const InputDecoration(labelText: 'Desde (año)'),
+                              InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
                           keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Por favor ingrese el año de inicio';
+                              return AppLocalizations.of(context)!.msg1;
                             }
                             return null;
                           },
@@ -491,18 +496,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         TextFormField(
                           controller: _endStudyController,
                           decoration:
-                              const InputDecoration(labelText: 'Hasta (año)'),
+                             InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
                           keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Por favor ingrese el año de finalización';
+                              return AppLocalizations.of(context)!.msg1;
                             }
                             return null;
                           },
                         ),
                         Row(
                           children: [
-                            const Text('Posee título:'),
+                             Text(AppLocalizations.of(context)!.poseeTitulo),
                             Switch(
                               activeColor: Colors.green,
                               value: _poseeTituloSecundario,
@@ -541,7 +546,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         });
                       }
                     },
-                    child: const Text('Guardar Educación Secundaria'),
+                    child: Text(AppLocalizations.of(context)!.guardarEstudios),
                   ),
                 ],
               ),
@@ -552,7 +557,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                 children: [
                   ListTile(
                       title:
-                          Text('Nivel Secundario: ${edu['nivelSecundario']}')),
+                          Text('${AppLocalizations.of(context)!.nivelSec}: ${edu['nivelSecundario']}')),
                 ],
               ),
             // Botón para agregar estudios terciarios o universitarios
@@ -565,7 +570,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step3() {
     return Step(
-      title: const Text('Experiencia'),
+      title: Text(AppLocalizations.of(context)!.experiencia),
       content: Form(
         key: _formKeys[3],
         child: Column(
@@ -581,59 +586,59 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                 ),
                 children: [
                   ListTile(
-                    title: Text('Desde: ${experiencia['desde']}'),
+                    title: Text('${AppLocalizations.of(context)!.desde}: ${experiencia['desde']}'),
                   ),
                   ListTile(
-                    title: Text('Hasta: ${experiencia['hasta']}'),
+                    title: Text('${AppLocalizations.of(context)!.hasta}: ${experiencia['hasta']}'),
                   ),
                   ListTile(
-                    title: Text('Tareas/Funciones: ${experiencia['posicion']}'),
+                    title: Text('${AppLocalizations.of(context)!.puesto}: ${experiencia['posicion']}'),
                   ),
                   ListTile(
                     title: Text(
-                        'Descripcion de funciones: ${experiencia['funciones']}'),
+                        '${AppLocalizations.of(context)!.funciones}: ${experiencia['funciones']}'),
                   ),
                 ],
               ),
             TextFormField(
               controller: _empresaController,
               decoration:
-                  const InputDecoration(labelText: 'Nombre de la empresa'),
+                   InputDecoration(labelText: AppLocalizations.of(context)!.nombreEmpresa),
               validator: (value) {
                 if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return 'Por favor ingrese el nombre de la empresa';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _desdeController,
-              decoration: const InputDecoration(labelText: 'Desde (año)'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return 'Por favor ingrese el año de inicio';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _hastaController,
-              decoration: const InputDecoration(labelText: 'Hasta (año)'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return 'Por favor ingrese el año de finalización';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _posicionController,
-              decoration: const InputDecoration(labelText: 'Posicion'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.puesto),
               validator: (value) {
                 if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return 'Por favor describa su Posición';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -641,10 +646,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             TextFormField(
               controller: _posicionDescController,
               decoration:
-                  const InputDecoration(labelText: 'Descripcion de funciones'),
+                 InputDecoration(labelText: AppLocalizations.of(context)!.funciones),
               validator: (value) {
                 if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return 'Por favor describa sus funciones';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -669,7 +674,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   });
                 }
               },
-              child: const Text('Guardar Experiencia'),
+              child: Text(AppLocalizations.of(context)!.guardarExperiencia),
             ),
           ],
         ),
@@ -680,30 +685,30 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step2() {
     return Step(
-      title: const Text('Dirección'),
+      title:  Text(AppLocalizations.of(context)!.direccion),
       content: Form(
         key: _formKeys[2],
         child: Column(
           children: [
             TextFormField(
               controller: _nationalityController,
-              decoration: const InputDecoration(
-                  hintText: 'Ej.: Argentina', labelText: 'Nacionalidad'),
+              decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.nacionalidadEjem, labelText: AppLocalizations.of(context)!.nacionalidad),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su nacionalidad';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _direccionController,
-              decoration: const InputDecoration(
-                  hintText: 'Ej.: Av. San Martín 123, Salta',
-                  labelText: 'Direccion'),
+              decoration:  InputDecoration(
+                  hintText: AppLocalizations.of(context)!.direccionEjem,  
+                  labelText: AppLocalizations.of(context)!.direccion),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su direccion';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -717,7 +722,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step1() {
     return Step(
-      title: const Text('Email'),
+      title: Text(AppLocalizations.of(context)!.email),
       content: Form(
         key: _formKeys[1],
         child: Column(
@@ -725,10 +730,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.email),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su email';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -736,11 +741,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             TextFormField(
               controller: _telefonoController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                  hintText: 'Ej.: 3874111222', labelText: 'Telefono'),
+              decoration:  InputDecoration(
+                  hintText: AppLocalizations.of(context)!.telefonoEjem, labelText: AppLocalizations.of(context)!.telefono),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su telefono';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -754,18 +759,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step0() {
     return Step(
-      title: const Text('Nombre'),
+      title: Text(AppLocalizations.of(context)!.nombre),
       content: Form(
         key: _formKeys[0],
         child: Column(
           children: [
             TextFormField(
               controller: _nombreController,
-              decoration: const InputDecoration(
-                  hintText: 'Ej.: Juan Pérez', labelText: 'Nombre Completo'),
+              decoration:  InputDecoration(
+                  hintText: AppLocalizations.of(context)!.nombreEjem, labelText: AppLocalizations.of(context)!.nombreCompleto),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su nombre';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },
@@ -773,10 +778,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             TextFormField(
               keyboardType: TextInputType.number,
               controller: _edadController,
-              decoration: const InputDecoration(labelText: 'Edad'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.edad),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese su edad';
+                  return AppLocalizations.of(context)!.msg1;
                 }
                 return null;
               },

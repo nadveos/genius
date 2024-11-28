@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:cvgenius/domain/entities/user.dart';
@@ -33,40 +35,50 @@ class UserCvDataSourceImpl extends UserCvRepository {
 
  @override
 Future<void> deleteCv(Id id) async {
-  final isar = await db;
-  final userCv = await isar.userCvs.get(id);
-  if (userCv != null) {
-    await isar.writeTxn(() async {
-      // Eliminar las relaciones antes de eliminar el UserCv
-      await userCv.skills.load(); // Cargar los datos relacionados
-      for (final skill in userCv.skills) {
-        await isar.skills.delete(skill.id);
-      }
-      userCv.skills.clear();
+  try {
+    final isar = await db;
+    final userCv = await isar.userCvs.get(id);
+    if (userCv != null) {
+      await isar.writeTxn(() async {
+        // Manejo seguro para relaciones
+        if ( userCv.skills.isLoaded) {
+          for (final skill in userCv.skills) {
+            await isar.skills.delete(skill.id);
+          }
+        }
+        userCv.skills.clear();
 
-      await userCv.studies.load();
-      for (final study in userCv.studies) {
-        await isar.studys.delete(study.id);
-      }
-      userCv.studies.clear();
+        if ( userCv.studies.isLoaded) {
+          for (final study in userCv.studies) {
+            await isar.studys.delete(study.id);
+          }
+        }
+        userCv.studies.clear();
 
-      await userCv.experiences.load();
-      for (final experience in userCv.experiences) {
-        await isar.experiences.delete(experience.id);
-      }
-      userCv.experiences.clear();
+        if ( userCv.experiences.isLoaded) {
+          for (final experience in userCv.experiences) {
+            await isar.experiences.delete(experience.id);
+          }
+        }
+        userCv.experiences.clear();
 
-      await userCv.highStudies.load();
-      for (final highStudy in userCv.highStudies) {
-        await isar.highStudys.delete(highStudy.id);
-      }
-      userCv.highStudies.clear();
+        if ( userCv.highStudies.isLoaded) {
+          for (final highStudy in userCv.highStudies) {
+            await isar.highStudys.delete(highStudy.id);
+          }
+        }
+        userCv.highStudies.clear();
 
-      // Finalmente, eliminar el UserCv
-      await isar.userCvs.delete(id);
-    });
+        // Eliminar el UserCv
+        await isar.userCvs.delete(id);
+      });
+    }
+  } catch (e) {
+    print('Error deleting CV with ID $id: $e');
+    throw Exception('Failed to delete CV');
   }
 }
+
 
 
   @override
@@ -80,7 +92,8 @@ Future<void> deleteCv(Id id) async {
   }
 
   @override
-  Future<void> saveUserCv(UserCv userCv) async {
+Future<void> saveUserCv(UserCv userCv) async {
+  try {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.userCvs.put(userCv);
@@ -89,11 +102,22 @@ Future<void> deleteCv(Id id) async {
       await userCv.skills.save();
       await userCv.highStudies.save();
     });
+  } catch (e) {
+    print('Error saving UserCv: $e');
+    throw Exception('Failed to save UserCv');
   }
+}
 
-  @override
-  Stream<List<UserCv>> getAllCvs() async* {
+
+ @override
+Stream<List<UserCv>> getAllCvs() async* {
+  try {
     final isar = await db;
     yield* isar.userCvs.where().watch(fireImmediately: true);
+  } catch (e) {
+    print('Error fetching all CVs: $e');
+    yield []; // Devuelve una lista vacía en caso de error
   }
+}
+
 }

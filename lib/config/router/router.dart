@@ -24,6 +24,7 @@ final approuter = GoRouter(
       path: '/create-cv',
       builder: (context, state) => const CreateCvScreen(),
     ),
+    GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
     
   ],
 );

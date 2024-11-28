@@ -1,6 +1,7 @@
 
 import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/infrastructure/infrastructure.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final isarUserProvider = Provider<UserCvDataSourceImpl>((ref) {
@@ -29,3 +30,6 @@ class ThemeNotifier extends StateNotifier<bool> {
 final themeProvider = StateNotifierProvider<ThemeNotifier, bool>(
   (ref) => ThemeNotifier(),
 );
+final localeProvider = Provider<Locale>((ref) {
+  return WidgetsBinding.instance.platformDispatcher.locale;
+});
