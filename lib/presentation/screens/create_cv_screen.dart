@@ -7,7 +7,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-
 class CreateCvScreen extends ConsumerStatefulWidget {
   const CreateCvScreen({super.key});
 
@@ -188,128 +187,191 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     }
 
     return Scaffold(
-    appBar: AppBar(
-    title: Text(AppLocalizations.of(context)!.crearCv),
-    ),
-
-      body: Stepper(
-        physics: const BouncingScrollPhysics(),
-        type: StepperType.vertical,
-        currentStep: _index,
-        onStepCancel: () {
-          if (_index > 0) {
-            setState(() {
-              _index -= 1;
-            });
-          }
-        },
-        onStepContinue: () {
-          if (validateStep(_index)) {
-            if (_index == steps.length - 1) {
-              _guardarCV();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)!.cvGuardado),
+    resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.crearCv),
+      ),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+          child: Stepper(
+            physics: const BouncingScrollPhysics(),
+            type: StepperType.horizontal,
+            connectorColor: const WidgetStatePropertyAll(Colors.transparent),
+            stepIconBuilder: (stepIndex, stepState) {
+              switch (stepIndex) {
+                case 0:
+                  return const Icon(Icons.person_4_outlined);
+                case 1:
+                  return const Icon(
+                    Icons.person_2_outlined,
+                  );
+                case 2:
+                  return const Icon(Icons.person_3_outlined);
+                case 3:
+                  return const Icon(Icons.work_history_outlined);
+                case 4:
+                case 5:
+                  return const Icon(Icons.school_outlined);
+                case 6:
+                  return const Icon(Icons.star_outline_outlined);
+                default:
+                  return const Icon(Icons.help_outlined);
+              }
+            },
+            stepIconMargin: const EdgeInsets.all(0),
+            currentStep: _index,
+            onStepCancel: () {
+              if (_index > 0) {
+                setState(() {
+                  _index -= 1;
+                });
+              }
+            },
+            onStepContinue: () {
+              if (validateStep(_index)) {
+                if (_index == steps.length - 1) {
+                  _guardarCV();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.cvGuardado),
+                    ),
+                  );
+                  context.go('/'); // Navegar a la pantalla principal
+                } else {
+                  setState(() {
+                    _index += 1;
+                  });
+                }
+              }
+            },
+            onStepTapped: (int index) {
+              setState(() {
+                _index = index;
+              });
+            },
+            steps: steps,
+            controlsBuilder: (BuildContext context, ControlsDetails details) {
+              final isLastStep = _index == steps.length - 1;
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    if (_index > 0)
+                      TextButton(
+                        onPressed: details.onStepCancel,
+                        child: Text(AppLocalizations.of(context)!.atras),
+                      ),
+                    ElevatedButton(
+                      onPressed: details.onStepContinue,
+                      child: Text(isLastStep
+                          ? AppLocalizations.of(context)!.guardarCv
+                          : AppLocalizations.of(context)!.continuar),
+                    ),
+                  ],
                 ),
               );
-              context.go('/'); // Navegar a la pantalla principal
-            } else {
-              setState(() {
-                _index += 1;
-              });
-            }
-          }
-        },
-        onStepTapped: (int index) {
-          setState(() {
-            _index = index;
-          });
-        },
-        steps: steps,
-        controlsBuilder: (BuildContext context, ControlsDetails details) {
-          final isLastStep = _index == steps.length - 1;
-          return Row(
-            children: <Widget>[
-              if (_index > 0)
-                TextButton(
-                  onPressed: details.onStepCancel,
-                  child: Text(AppLocalizations.of(context)!.atras),
-                ),
-              ElevatedButton(
-                onPressed: details.onStepContinue,
-                child: Text(isLastStep ? AppLocalizations.of(context)!.guardarCv : AppLocalizations.of(context)!.continuar),
-              ),
-            ],
-          );
-        },
+            },
+          ),
+        ),
       ),
     );
+
+
+
   }
 
   Step _step6() {
     return Step(
-      title: Text(AppLocalizations.of(context)!.otrosConocimientos),
+      stepStyle: const StepStyle(),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[6],
-        child: Column(
-          children: [
-            for (var conocimiento in _conocimientos)
-              ExpansionTile(
-                title: Text(conocimiento['conocimiento']!),
-                children: [
-                  ListTile(
-                    title: Text(conocimiento['conocimiento']!),
-                  ),
-                ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.conocimientosAdicionales,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            TextFormField(
-              controller: _conocimientoController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.conocimientos),
-              validator: (value) {
-                if (_conocimientos.isEmpty &&
-                    (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            DropdownButtonFormField<String>(
-              value: _nivelController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.nivel),
-              items:  [
-                DropdownMenuItem(
-                  value: 'Basico',
-                  child: Text(AppLocalizations.of(context)!.basico,),
+              for (var conocimiento in _conocimientos)
+                ExpansionTile(
+                  title: Text(conocimiento['conocimiento']!),
+                  children: [
+                    ListTile(
+                      title: Text(conocimiento['conocimiento']!),
+                    ),
+                  ],
                 ),
-                DropdownMenuItem(
-                  value: 'Intermedio',
-                  child: Text(AppLocalizations.of(context)!.intermedio,),
-                ),
-                DropdownMenuItem(value: 'Avanzado', child: Text(AppLocalizations.of(context)!.avanzado)),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _nivelController = value!;
-                });
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKeys[6].currentState!.validate()) {
+              TextFormField(
+                controller: _conocimientoController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.conocimientos),
+                validator: (value) {
+                  if (_conocimientos.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              DropdownButtonFormField<String>(
+                value: _nivelController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.nivel),
+                items: [
+                  DropdownMenuItem(
+                    value: 'Basico',
+                    child: Text(
+                      AppLocalizations.of(context)!.basico,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Intermedio',
+                    child: Text(
+                      AppLocalizations.of(context)!.intermedio,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                      value: 'Avanzado',
+                      child: Text(AppLocalizations.of(context)!.avanzado)),
+                ],
+                onChanged: (value) {
                   setState(() {
-                    _conocimientos.add({
-                      'conocimiento': _conocimientoController.text,
-                      'nivel': _nivelController
-                          , // Puedes ajustar el nivel aquí según corresponda
-                    });
-                    _conocimientoController.clear();
-                    _formKeys[6].currentState!.reset();
+                    _nivelController = value!;
                   });
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.guardarConocimientos),
-            ),
-          ],
+                },
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKeys[6].currentState!.validate()) {
+                      setState(() {
+                        _conocimientos.add({
+                          'conocimiento': _conocimientoController.text,
+                          'nivel':
+                              _nivelController, // Puedes ajustar el nivel aquí según corresponda
+                        });
+                        _conocimientoController.clear();
+                        _formKeys[6].currentState!.reset();
+                      });
+                    }
+                  },
+                  child:
+                      Text(AppLocalizations.of(context)!.guardarConocimientos),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 6,
@@ -318,25 +380,43 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step5() {
     return Step(
-      title:  Text(AppLocalizations.of(context)!.estudiosUni),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[5],
-        child: Column(
-          children: [
-            for (var highEducacion in _highEducacion)
-              ExpansionTile(
-                title: Text(highEducacion['institution']!),
-                children: [
-                  ListTile(
-                    title: Text(highEducacion['titulo']!),
-                  ),
-                ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.estudiosRealizados,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            if (!_terciarioGuardado)
+              for (var highEducacion in _highEducacion)
+                ExpansionTile(
+                  title: Text(highEducacion['institution']!),
+                  children: [
+                    ListTile(
+                      title: Text(highEducacion['titulo']!),
+                    ),
+                  ],
+                ),
+              if (!_terciarioGuardado)
+                TextFormField(
+                  controller: _institutioHighController,
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.instiUni),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(context)!.msg1;
+                    }
+                    return null;
+                  },
+                ),
               TextFormField(
-                controller: _institutioHighController,
-                decoration:
-                     InputDecoration(labelText: AppLocalizations.of(context)!.instiUni),
+                controller: _tituloTerciarioController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.tituloUni),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.msg1;
@@ -344,79 +424,76 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
-            TextFormField(
-              controller: _tituloTerciarioController,
-              decoration:
-                   InputDecoration(labelText: AppLocalizations.of(context)!.tituloUni),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _startHighStudyController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _endHighStudyController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            Row(
-              children: [
-                 Text(AppLocalizations.of(context)!.poseeTitulo),
-                Switch(
-                  activeColor: Colors.green,
-                  value: _poseeTituloTerciario,
-                  onChanged: (value) {
-                    setState(() {
-                      _poseeTituloTerciario = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKeys[5].currentState!.validate()) {
-                  setState(() {
-                    final highEducacion = {
-                      'institution': _institutioHighController.text,
-                      'titulo': _tituloTerciarioController.text,
-                      'desde': _startHighStudyController.text,
-                      'hasta': _endHighStudyController.text,
-                      'poseeTituloTerciario': _poseeTituloTerciario,
-                    };
-                  
-                    _highEducacion.add(highEducacion);
-                    _terciarioGuardado = true;
-                    _tituloTerciarioController.clear();
-                    _institutioHighController.clear();
-                    _startHighStudyController.clear();
-                    _endHighStudyController.clear();
-                    _poseeTituloTerciario = false;
-                    _formKeys[5].currentState!.reset();
-                  });
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.guardarEstudios,)
-            ),
-          ],
+              TextFormField(
+                controller: _startHighStudyController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fechaInicio),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _endHighStudyController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fechaFin),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              Row(
+                children: [
+                  Text(AppLocalizations.of(context)!.poseeTitulo),
+                  Switch(
+                    activeColor: Colors.green,
+                    value: _poseeTituloTerciario,
+                    onChanged: (value) {
+                      setState(() {
+                        _poseeTituloTerciario = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKeys[5].currentState!.validate()) {
+                        setState(() {
+                          final highEducacion = {
+                            'institution': _institutioHighController.text,
+                            'titulo': _tituloTerciarioController.text,
+                            'desde': _startHighStudyController.text,
+                            'hasta': _endHighStudyController.text,
+                            'poseeTituloTerciario': _poseeTituloTerciario,
+                          };
+
+                          _highEducacion.add(highEducacion);
+                          _terciarioGuardado = true;
+                          _tituloTerciarioController.clear();
+                          _institutioHighController.clear();
+                          _startHighStudyController.clear();
+                          _endHighStudyController.clear();
+                          _poseeTituloTerciario = false;
+                          _formKeys[5].currentState!.reset();
+                        });
+                      }
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.guardarEstudios,
+                    )),
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 5,
@@ -425,143 +502,161 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step4() {
     return Step(
-      title:  Text(AppLocalizations.of(context)!.estudiosSec),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[4],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Formulario para agregar el nivel secundario
-            if (!_secundarioGuardado)
-              Column(
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: _nivelSecundario,
-                    decoration:
-                         InputDecoration(labelText: AppLocalizations.of(context)!.nivelSec),
-                    items:  [
-                      DropdownMenuItem(
-                          value: 'Secundario En Curso',
-                          child: Text(AppLocalizations.of(context)!.secEnCurso)),
-                      DropdownMenuItem(
-                          value: 'Secundario Incompleto',
-                          child: Text(AppLocalizations.of(context)!.secIncompleto)),
-                      DropdownMenuItem(
-                          value: 'Secundario Completo',
-                          child: Text(AppLocalizations.of(context)!.secCompleto)),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _nivelSecundario = value!;
-                      });
-                    },
-                  ),
-                  TextFormField(
-                    controller: _institutionController,
-                    decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.instiSec),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)!.msg1;
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _tituloSecundarioController,
-                    decoration:  InputDecoration(
-                        labelText: AppLocalizations.of(context)!.tituloSec),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)!.msg1;
-                      }
-                      return null;
-                    },
-                  ),
-                  if (_nivelSecundario == 'Secundario Completo')
-                    Column(
-                      children: [
-                        TextFormField(
-                          controller: _startStudyController,
-                          decoration:
-                              InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context)!.msg1;
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          controller: _endStudyController,
-                          decoration:
-                             InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context)!.msg1;
-                            }
-                            return null;
-                          },
-                        ),
-                        Row(
-                          children: [
-                             Text(AppLocalizations.of(context)!.poseeTitulo),
-                            Switch(
-                              activeColor: Colors.green,
-                              value: _poseeTituloSecundario,
-                              onChanged: (value) {
-                                setState(() {
-                                  _poseeTituloSecundario = value;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.estudiosRealizados,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              // Formulario para agregar el nivel secundario
+              if (!_secundarioGuardado)
+                Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: _nivelSecundario,
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.nivelSec),
+                      items: [
+                        DropdownMenuItem(
+                            value: 'Secundario En Curso',
+                            child:
+                                Text(AppLocalizations.of(context)!.secEnCurso)),
+                        DropdownMenuItem(
+                            value: 'Secundario Incompleto',
+                            child: Text(
+                                AppLocalizations.of(context)!.secIncompleto)),
+                        DropdownMenuItem(
+                            value: 'Secundario Completo',
+                            child: Text(
+                                AppLocalizations.of(context)!.secCompleto)),
                       ],
-                    ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKeys[4].currentState!.validate()) {
+                      onChanged: (value) {
                         setState(() {
-                          final educacion = {
-                            'nivelSecundario': _nivelSecundario,
-                            'institution': _institutionController.text,
-                            'poseeTituloSecundario': _poseeTituloSecundario,
-                            'desde': _startStudyController.text,
-                            'hasta': _endStudyController.text,
-                            'titulo': _tituloSecundarioController.text,
-                          };
-
-                          _educacion.add(educacion);
-
-                          // Marcar como guardado y limpiar controladores
-                          _secundarioGuardado = true;
-                          _tituloSecundarioController.clear();
-                          _institutionController.clear();
-                          _startStudyController.clear();
-                          _endStudyController.clear();
-                          _formKeys[4].currentState!.reset();
+                          _nivelSecundario = value!;
                         });
-                      }
-                    },
-                    child: Text(AppLocalizations.of(context)!.guardarEstudios),
-                  ),
-                ],
-              ),
-            // Lista de estudios guardados
-            for (var edu in _educacion)
-              ExpansionTile(
-                title: Text(edu['institution'] ?? 'Sin institución'),
-                children: [
-                  ListTile(
-                      title:
-                          Text('${AppLocalizations.of(context)!.nivelSec}: ${edu['nivelSecundario']}')),
-                ],
-              ),
-            // Botón para agregar estudios terciarios o universitarios
-          ],
+                      },
+                    ),
+                    TextFormField(
+                      controller: _institutionController,
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.instiSec),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)!.msg1;
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _tituloSecundarioController,
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.tituloSec),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)!.msg1;
+                        }
+                        return null;
+                      },
+                    ),
+                    if (_nivelSecundario == 'Secundario Completo')
+                      Column(
+                        children: [
+                          TextFormField(
+                            controller: _startStudyController,
+                            decoration: InputDecoration(
+                                labelText:
+                                    AppLocalizations.of(context)!.fechaInicio),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(context)!.msg1;
+                              }
+                              return null;
+                            },
+                          ),
+                          TextFormField(
+                            controller: _endStudyController,
+                            decoration: InputDecoration(
+                                labelText:
+                                    AppLocalizations.of(context)!.fechaFin),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(context)!.msg1;
+                              }
+                              return null;
+                            },
+                          ),
+                          Row(
+                            children: [
+                              Text(AppLocalizations.of(context)!.poseeTitulo),
+                              Switch(
+                                activeColor: Colors.green,
+                                value: _poseeTituloSecundario,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _poseeTituloSecundario = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKeys[4].currentState!.validate()) {
+                            setState(() {
+                              final educacion = {
+                                'nivelSecundario': _nivelSecundario,
+                                'institution': _institutionController.text,
+                                'poseeTituloSecundario': _poseeTituloSecundario,
+                                'desde': _startStudyController.text,
+                                'hasta': _endStudyController.text,
+                                'titulo': _tituloSecundarioController.text,
+                              };
+
+                              _educacion.add(educacion);
+
+                              // Marcar como guardado y limpiar controladores
+                              _secundarioGuardado = true;
+                              _tituloSecundarioController.clear();
+                              _institutionController.clear();
+                              _startStudyController.clear();
+                              _endStudyController.clear();
+                              _formKeys[4].currentState!.reset();
+                            });
+                          }
+                        },
+                        child:
+                            Text(AppLocalizations.of(context)!.guardarEstudios),
+                      ),
+                    ),
+                  ],
+                ),
+              // Lista de estudios guardados
+              for (var edu in _educacion)
+                ExpansionTile(
+                  title: Text(edu['institution'] ?? 'Sin institución'),
+                  children: [
+                    ListTile(
+                        title: Text(
+                            '${AppLocalizations.of(context)!.nivelSec}: ${edu['nivelSecundario']}')),
+                  ],
+                ),
+              // Botón para agregar estudios terciarios o universitarios
+            ],
+          ),
         ),
       ),
       isActive: _index == 4,
@@ -570,113 +665,136 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step3() {
     return Step(
-      title: Text(AppLocalizations.of(context)!.experiencia),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[3],
-        child: Column(
-          children: [
-            for (var experiencia in _experiencias)
-              ExpansionTile(
-                title: Text(
-                  experiencia['empresa']!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                  ),
-                ),
-                children: [
-                  ListTile(
-                    title: Text('${AppLocalizations.of(context)!.desde}: ${experiencia['desde']}'),
-                  ),
-                  ListTile(
-                    title: Text('${AppLocalizations.of(context)!.hasta}: ${experiencia['hasta']}'),
-                  ),
-                  ListTile(
-                    title: Text('${AppLocalizations.of(context)!.puesto}: ${experiencia['posicion']}'),
-                  ),
-                  ListTile(
-                    title: Text(
-                        '${AppLocalizations.of(context)!.funciones}: ${experiencia['funciones']}'),
-                  ),
-                ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.experienciaLaboral,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            TextFormField(
-              controller: _empresaController,
-              decoration:
-                   InputDecoration(labelText: AppLocalizations.of(context)!.nombreEmpresa),
-              validator: (value) {
-                if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _desdeController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaInicio),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _hastaController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fechaFin),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _posicionController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.puesto),
-              validator: (value) {
-                if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _posicionDescController,
-              decoration:
-                 InputDecoration(labelText: AppLocalizations.of(context)!.funciones),
-              validator: (value) {
-                if (_experiencias.isEmpty && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKeys[3].currentState!.validate()) {
-                  setState(() {
-                    _experiencias.add({
-                      'empresa': _empresaController.text,
-                      'desde': _desdeController.text,
-                      'hasta': _hastaController.text,
-                      'posicion': _posicionController.text,
-                      'funciones': _posicionDescController.text,
-                    });
-                    _empresaController.clear();
-                    _desdeController.clear();
-                    _hastaController.clear();
-                    _posicionController.clear();
-                    _posicionDescController.clear();
-                    _formKeys[3].currentState!.reset();
-                  });
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.guardarExperiencia),
-            ),
-          ],
+              for (var experiencia in _experiencias)
+                ExpansionTile(
+                  title: Text(
+                    experiencia['empresa']!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  children: [
+                    ListTile(
+                      title: Text(
+                          '${AppLocalizations.of(context)!.desde}: ${experiencia['desde']}'),
+                    ),
+                    ListTile(
+                      title: Text(
+                          '${AppLocalizations.of(context)!.hasta}: ${experiencia['hasta']}'),
+                    ),
+                    ListTile(
+                      title: Text(
+                          '${AppLocalizations.of(context)!.puesto}: ${experiencia['posicion']}'),
+                    ),
+                    ListTile(
+                      title: Text(
+                          '${AppLocalizations.of(context)!.funciones}: ${experiencia['funciones']}'),
+                    ),
+                  ],
+                ),
+              TextFormField(
+                controller: _empresaController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.nombreEmpresa),
+                validator: (value) {
+                  if (_experiencias.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _desdeController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fechaInicio),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (_experiencias.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _hastaController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.fechaFin),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (_experiencias.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _posicionController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.puesto),
+                validator: (value) {
+                  if (_experiencias.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _posicionDescController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.funciones),
+                validator: (value) {
+                  if (_experiencias.isEmpty &&
+                      (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKeys[3].currentState!.validate()) {
+                      setState(() {
+                        _experiencias.add({
+                          'empresa': _empresaController.text,
+                          'desde': _desdeController.text,
+                          'hasta': _hastaController.text,
+                          'posicion': _posicionController.text,
+                          'funciones': _posicionDescController.text,
+                        });
+                        _empresaController.clear();
+                        _desdeController.clear();
+                        _hastaController.clear();
+                        _posicionController.clear();
+                        _posicionDescController.clear();
+                        _formKeys[3].currentState!.reset();
+                      });
+                    }
+                  },
+                  child: Text(AppLocalizations.of(context)!.guardarExperiencia),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 3,
@@ -685,35 +803,44 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step2() {
     return Step(
-      title:  Text(AppLocalizations.of(context)!.direccion),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[2],
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nationalityController,
-              decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.nacionalidadEjem, labelText: AppLocalizations.of(context)!.nacionalidad),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _direccionController,
-              decoration:  InputDecoration(
-                  hintText: AppLocalizations.of(context)!.direccionEjem,  
-                  labelText: AppLocalizations.of(context)!.direccion),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.datosPersonales,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextFormField(
+                controller: _nationalityController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.nacionalidadEjem,
+                    labelText: AppLocalizations.of(context)!.nacionalidad),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _direccionController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.direccionEjem,
+                    labelText: AppLocalizations.of(context)!.direccion),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 2,
@@ -722,35 +849,45 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step1() {
     return Step(
-      title: Text(AppLocalizations.of(context)!.email),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[1],
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.email),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _telefonoController,
-              keyboardType: TextInputType.phone,
-              decoration:  InputDecoration(
-                  hintText: AppLocalizations.of(context)!.telefonoEjem, labelText: AppLocalizations.of(context)!.telefono),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.datosPersonales,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.email),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _telefonoController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.telefonoEjem,
+                    labelText: AppLocalizations.of(context)!.telefono),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 1,
@@ -759,34 +896,44 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   Step _step0() {
     return Step(
-      title: Text(AppLocalizations.of(context)!.nombre),
+      title: const SizedBox.shrink(),
       content: Form(
         key: _formKeys[0],
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration:  InputDecoration(
-                  hintText: AppLocalizations.of(context)!.nombreEjem, labelText: AppLocalizations.of(context)!.nombreCompleto),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              keyboardType: TextInputType.number,
-              controller: _edadController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.edad),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)!.msg1;
-                }
-                return null;
-              },
-            ),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.datosPersonales,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextFormField(
+                controller: _nombreController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.nombreEjem,
+                    labelText: AppLocalizations.of(context)!.nombreCompleto),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                keyboardType: TextInputType.number,
+                controller: _edadController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.edad),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       isActive: _index == 0,

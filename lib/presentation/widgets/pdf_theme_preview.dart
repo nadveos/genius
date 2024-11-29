@@ -40,10 +40,11 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
 
     // Define una lista de colores para diferentes temas
     final themeColors = [
+      const Color.fromRGBO(222, 177, 190, 1),
       const Color.fromRGBO(205, 241, 231, 1),
-      const Color.fromRGBO(255, 223, 186,1),
-      const Color.fromRGBO(186, 225, 255,1),
-     
+      const Color.fromRGBO(255, 223, 186, 1),
+      const Color.fromRGBO(186, 225, 255, 1),
+      const Color.fromRGBO(195, 139, 191, 1)
     ];
 
     // Asegúrate de que el índice de `selectedTheme` no exceda la longitud de `themeColors`
@@ -64,28 +65,13 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
 
         return Column(
           children: [
-            // Vista previa del tema seleccionado
-            Container(
-              height: 80,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: selectedColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: selectedColor, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  'Vista previa de tema',
-                  style: TextStyle(
-                    color: selectedColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
+            const Text(
+              'Select decoration',
+              textAlign: TextAlign.center,
             ),
             // Lista horizontal de temas
-            Expanded(
+            SizedBox(
+              height: 150,
               child: ListView.builder(
                 controller: controller,
                 padding: const EdgeInsets.all(8),
@@ -117,8 +103,8 @@ class _ThemePreviewState extends ConsumerState<ThemePreview> {
                       child: Center(
                         child: SvgPicture.asset(
                           svgFile,
-                          width: 100,
-                          height: 100,
+                          width: 80,
+                          height: 80,
                         ),
                       ),
                     ),

@@ -21,9 +21,11 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 List<PdfColor> themeColors = [
+  const PdfColor.fromInt(0xffa33d63),
   const PdfColor.fromInt(0xffCDF1E7),
   const PdfColor.fromInt(0xffFFDFBA),
   const PdfColor.fromInt(0xffBAE1FF),
+  const PdfColor.fromInt(0xff800080),
 ];
 
 class CvDataScreen extends ConsumerStatefulWidget {
@@ -86,7 +88,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     final count = await client.countTokens(prompt);
     print(count.totalTokens);
     final response = await client.generateContent(prompt);
-    print(response.usageMetadata);
+
     return response.text.toString();
   }
 
@@ -129,8 +131,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     //creacion de carta de presentación
 
     //creacion del pdf
-    Future<String> generatePdf(
-        UserCv userCv, int themeIndex, PdfPageFormat format, BuildContext context) async {
+    Future<String> generatePdf(UserCv userCv, int themeIndex,
+        PdfPageFormat format, BuildContext context) async {
       final pdf = pw.Document(
           title: userCv.name,
           author: 'CV Genius',
@@ -142,8 +144,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
 
       final themeColor = themeColors[selectedTheme]; // Selección del color
       final applocalizations = AppLocalizations.of(context);
-      final pageTheme =
-          await _myPageTheme(format, selectedTheme); // Pasa el índice
+      final pageTheme = await _myPageTheme(format, selectedTheme);
+      // Pasa el índice
       pdf.addPage(pw.Page(
           pageTheme: pageTheme,
           build: (pw.Context context) {
@@ -243,10 +245,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
             ),
             pw.Divider(color: themeColor),
             if (userCv.experiences.isNotEmpty)
-              _Category(
-                  title:
-                      applocalizations.experiencia,
-                  color: themeColor),
+              _Category(title: applocalizations.experiencia, color: themeColor),
             ...userCv.experiences.map((e) {
               return _Block(
                 color: themeColor,
@@ -256,9 +255,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               );
             }),
             if (userCv.studies.isNotEmpty)
-              _Category(
-                  title: applocalizations.estudios,
-                  color: themeColor),
+              _Category(title: applocalizations.estudios, color: themeColor),
             ...userCv.studies.map((study) {
               // Verificar el nivel de estudio según el contenido
               if (study.institutionName != null && study.degree != null) {
@@ -284,8 +281,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                   study.isGraduated == true) {
                 return _Block(
                   color: themeColor,
-                  title:
-                      applocalizations.secCompleto,
+                  title: applocalizations.secCompleto,
                   desc: '${study.startDate} - ${study.endDate}',
                 );
               } else {
@@ -309,9 +305,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               ),
             if (userCv.skills.isNotEmpty)
               _Category(
-                  title: applocalizations
-                      .conocimientos,
-                  color: themeColor),
+                  title: applocalizations.conocimientos, color: themeColor),
             ...userCv.skills.map((skill) {
               return _Block(
                 color: themeColor,
@@ -359,10 +353,18 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               children: [
                 // Avatar
                 if (_imageBytes != null && _imageBytes!.isNotEmpty)
-                  CircleAvatar(
-                    radius: 150,
-                    backgroundImage: MemoryImage(_imageBytes!),
+                  Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: MemoryImage(_imageBytes!),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
+
                 const SizedBox(height: 16),
 
                 // Datos personales
@@ -458,7 +460,6 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                
                                 ListTile(
                                   leading: const Icon(Icons.photo_library),
                                   title: Text(AppLocalizations.of(context)!
@@ -468,16 +469,16 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                     pickImage();
                                   },
                                 ),
-                                if(Platform.isAndroid)
-                                ListTile(
-                                  leading: const Icon(Icons.camera_alt),
-                                  title: Text(
-                                      AppLocalizations.of(context)!.tomarFoto),
-                                  onTap: () {
-                                    context.pop(context);
-                                    takePicture();
-                                  },
-                                ),
+                                if (Platform.isAndroid)
+                                  ListTile(
+                                    leading: const Icon(Icons.camera_alt),
+                                    title: Text(AppLocalizations.of(context)!
+                                        .tomarFoto),
+                                    onTap: () {
+                                      context.pop(context);
+                                      takePicture();
+                                    },
+                                  ),
                               ],
                             ),
                           ),
@@ -656,9 +657,11 @@ class _Block extends pw.StatelessWidget {
 Future<pw.PageTheme> _myPageTheme(
     PdfPageFormat format, int selectedThemeIndex) async {
   final themeSvgs = [
+    'assets/svg/r0.svg',
     'assets/svg/r1.svg',
     'assets/svg/r2.svg',
     'assets/svg/r3.svg',
+    'assets/svg/r4.svg',
   ];
 
   final bgShapePath = themeSvgs[selectedThemeIndex];

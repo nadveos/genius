@@ -23,29 +23,42 @@ class AppTheme {
           backgroundColor: Colors.white,
           modalBackgroundColor: Colors.white,
         ),
-        
+        iconTheme: const IconThemeData(color: Colors.blue),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.blue),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+          ),
+        ),
       );
   ThemeData getConfigDark() => ThemeData(
-  colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue, brightness: Brightness.dark),
-  useMaterial3: true,
-  brightness: Brightness.dark,
-  primaryColor: Colors.blue,
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.black,
-    foregroundColor: Colors.white,
-  ),
-  buttonTheme: const ButtonThemeData(
-    buttonColor: Colors.blue,
-    textTheme: ButtonTextTheme.primary,
-  ),
-  textTheme: const TextTheme(
-    bodyLarge: TextStyle(color: Colors.white),
-    bodyMedium: TextStyle(color: Colors.white70),
-  ),
-  bottomSheetTheme: const BottomSheetThemeData(
-    backgroundColor: Colors.black,
-    modalBackgroundColor: Colors.black,
-  ),
-  );
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue, brightness: Brightness.dark),
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primaryColor: Colors.blue,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Colors.blue,
+          textTheme: ButtonTextTheme.primary,
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.black,
+          modalBackgroundColor: Colors.black,
+        ),
+       elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.blue),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.blue),
+      );
 }
