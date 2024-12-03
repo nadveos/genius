@@ -98,7 +98,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit),
+                icon: const Icon(Icons.remove_red_eye, color: Colors.green,),
                 onPressed: () {
                   context.push('/cv-data/${cvList[index].id}');
                 },
@@ -107,7 +107,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                 onPressed: () {
                   ref.read(isarUserProvider).deleteCv(cvList[index].id);
                 },
-                icon: const Icon(Icons.delete),
+                icon: const Icon(Icons.delete, color: Colors.red,),
               ),
             ],
           ),

@@ -484,6 +484,24 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerLeft,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _terciarioGuardado = false;
+                      _tituloTerciarioController.clear();
+                      _institutioHighController.clear();
+                      _startHighStudyController.clear();
+                      _endHighStudyController.clear();
+                      _poseeTituloTerciario = false;
+                      _formKeys[5].currentState!.reset();
+                    });
+                  },
+                  icon: const Icon(Icons.add_circle_outline_outlined),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
                 child: ElevatedButton(
                     onPressed: () {
                       if (_formKeys[5].currentState!.validate()) {
@@ -497,13 +515,13 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                           };
 
                           _highEducacion.add(highEducacion);
-                          _terciarioGuardado = true;
                           _tituloTerciarioController.clear();
                           _institutioHighController.clear();
                           _startHighStudyController.clear();
                           _endHighStudyController.clear();
                           _poseeTituloTerciario = false;
                           _formKeys[5].currentState!.reset();
+                          _terciarioGuardado = true;
                         });
                       }
                     },
