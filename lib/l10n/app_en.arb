@@ -1,6 +1,6 @@
 {
 "@@locale": "en",
-"genius": "Cv Genius",
+"genius": "CV Genius",
 "@genius": {},
 "misCvs"    : "My resumes",
 "@misCvs": {},
@@ -131,7 +131,9 @@
 "bienvenidoMsg2": "Our AI will help you complete your CV, creating a professional document that includes your personal details, studies, work experience and additional knowledge in a Cover Letter.",
 "@bienvenidoMsg2": {},
 "imagenDePerfil": "Profile picture",
-"@imagenDePerfil": {}
+"@imagenDePerfil": {},
+"generandoCv": "Generating Resume",
+"@generandoCv": {}
 
 
 }

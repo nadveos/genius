@@ -1,6 +1,6 @@
 {
 "@@locale": "es",
-"genius": "Cv Genius",
+"genius": "CV Genius",
 "@genius": {},
 "misCvs"    : "Mis CVs",
 "@misCvs": {},
@@ -131,7 +131,9 @@
 "bienvenidoMsg2": "Nuestra IA te ayudará a completar tu CV, creando un documento profesional que incluye tus datos personales, estudios, experiencia laboral y conocimientos adicionales en una Carta de Presentación.",
 "@bienvenidoMsg2": {},
 "imagenDePerfil": "Imagen de Perfil",
-"@imagenDePerfil": {}
+"@imagenDePerfil": {},
+"generandoCv": "Generando CV",
+"@generandoCv": {}
 
 
 }

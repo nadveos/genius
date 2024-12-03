@@ -129,15 +129,16 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Dialog(
+        return Dialog(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 16),
-                Text("Generando CV..."),
+                const CircularProgressIndicator(),
+                const SizedBox(width: 16),
+                Text(AppLocalizations.of(context)!.generandoCv
+                ),
               ],
             ),
           ),
