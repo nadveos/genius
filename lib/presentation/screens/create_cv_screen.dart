@@ -166,11 +166,13 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     bool validateStep(int index) {
       switch (index) {
         case 0:
+          return _formKeys[0].currentState!.validate();
         case 1:
+          return _formKeys[1].currentState!.validate();
         case 2:
-          return _formKeys[index].currentState!.validate();
+          return _formKeys[2].currentState!.validate();
         case 3:
-          return _experiencias.isNotEmpty;
+          return _experiencias.isNotEmpty || _experiencias.isEmpty;
         case 4:
           return _nivelSecundario == 'Secundario En Curso' ||
               _nivelSecundario == 'Secundario Incompleto' ||
@@ -178,7 +180,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         case 5:
           return _highEducacion.isNotEmpty || _highEducacion.isEmpty;
         case 6:
-          return _conocimientos.isNotEmpty;
+          return _conocimientos.isNotEmpty || _conocimientos.isEmpty;
 
         // No requiere validación
         default:
@@ -189,7 +191,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     return Scaffold(
     resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.crearCv),
+        title: Text(
+        semanticsLabel: AppLocalizations.of(context)!.crearCv,
+        AppLocalizations.of(context)!.crearCv),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -237,7 +241,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   _guardarCV();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(AppLocalizations.of(context)!.cvGuardado),
+                      content: Text(
+                      semanticsLabel: AppLocalizations.of(context)!.cvGuardado,
+                      AppLocalizations.of(context)!.cvGuardado),
                     ),
                   );
                   context.go('/'); // Navegar a la pantalla principal
@@ -265,11 +271,16 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     if (_index > 0)
                       TextButton(
                         onPressed: details.onStepCancel,
-                        child: Text(AppLocalizations.of(context)!.atras),
+                        child: Text(
+                        semanticsLabel: AppLocalizations.of(context)!.atras,
+                        AppLocalizations.of(context)!.atras),
                       ),
                     ElevatedButton(
                       onPressed: details.onStepContinue,
-                      child: Text(isLastStep
+                      child: Text(
+                      semanticsLabel: isLastStep ? AppLocalizations.of(context)!.guardarCv
+                          : AppLocalizations.of(context)!.continuar,
+                      isLastStep
                           ? AppLocalizations.of(context)!.guardarCv
                           : AppLocalizations.of(context)!.continuar),
                     ),
@@ -296,6 +307,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Conocimientos Adicionales, ingrese sus conocimientos adicionales',
                 AppLocalizations.of(context)!.conocimientosAdicionales,
                 textAlign: TextAlign.center,
                 style:
@@ -310,6 +322,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
               TextFormField(
                 controller: _conocimientoController,
                 decoration: InputDecoration(
@@ -322,6 +335,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 value: _nivelController,
                 decoration: InputDecoration(
@@ -387,6 +401,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
                 AppLocalizations.of(context)!.estudiosRealizados,
                 textAlign: TextAlign.center,
                 style:
@@ -401,6 +416,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
               if (!_terciarioGuardado)
                 TextFormField(
                   controller: _institutioHighController,
@@ -413,6 +429,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 10),
               TextFormField(
                 controller: _tituloTerciarioController,
                 decoration: InputDecoration(
@@ -424,6 +441,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _startHighStudyController,
                 decoration: InputDecoration(
@@ -436,6 +454,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _endHighStudyController,
                 decoration: InputDecoration(
@@ -510,12 +529,14 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+              semanticsLabel: 'Estudios Realizados, ingrese sus estudios secundarios',
                 AppLocalizations.of(context)!.estudiosRealizados,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               // Formulario para agregar el nivel secundario
+              const SizedBox(height: 10),
               if (!_secundarioGuardado)
                 Column(
                   children: [
@@ -543,6 +564,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         });
                       },
                     ),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _institutionController,
                       decoration: InputDecoration(
@@ -554,6 +576,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _tituloSecundarioController,
                       decoration: InputDecoration(
@@ -565,6 +588,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 10),
                     if (_nivelSecundario == 'Secundario Completo')
                       Column(
                         children: [
@@ -581,6 +605,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 10),
                           TextFormField(
                             controller: _endStudyController,
                             decoration: InputDecoration(
@@ -594,6 +619,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Text(AppLocalizations.of(context)!.poseeTitulo),
@@ -644,6 +670,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
               // Lista de estudios guardados
               for (var edu in _educacion)
                 ExpansionTile(
@@ -672,6 +699,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Experiencia Laboral, ingrese su experiencia laboral',
                 AppLocalizations.of(context)!.experienciaLaboral,
                 textAlign: TextAlign.center,
                 style:
@@ -705,6 +733,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
               TextFormField(
                 controller: _empresaController,
                 decoration: InputDecoration(
@@ -717,6 +746,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _desdeController,
                 decoration: InputDecoration(
@@ -730,6 +760,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _hastaController,
                 decoration: InputDecoration(
@@ -743,6 +774,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _posicionController,
                 decoration: InputDecoration(
@@ -755,6 +787,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _posicionDescController,
                 decoration: InputDecoration(
@@ -810,11 +843,13 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Datos Personales, ingrese su dirección y nacionalidad',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _nationalityController,
                 decoration: InputDecoration(
@@ -827,6 +862,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _direccionController,
                 decoration: InputDecoration(
@@ -856,23 +892,29 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Datos Personales, ingreso de email y telefono',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.email),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  final regex = RegExp(
+                      r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+(\.[a-zA-Z]+)?$');
+
+                  if (value == null || value.isEmpty || !regex.hasMatch(value)) {
                     return AppLocalizations.of(context)!.msg1;
                   }
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _telefonoController,
                 keyboardType: TextInputType.phone,
@@ -903,14 +945,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
+              semanticsLabel: 'Datos Personales',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
               TextFormField(
+              
                 controller: _nombreController,
                 decoration: InputDecoration(
+                
                     hintText: AppLocalizations.of(context)!.nombreEjem,
                     labelText: AppLocalizations.of(context)!.nombreCompleto),
                 validator: (value) {
@@ -920,6 +966,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 keyboardType: TextInputType.number,
                 controller: _edadController,

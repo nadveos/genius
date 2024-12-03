@@ -33,11 +33,11 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             if (data.isNotEmpty) {
               return Text(AppLocalizations.of(context)!.misCvs);
             } else {
-              return const Text('CV Genius');
+              return  Text(AppLocalizations.of(context)!.genius);
             }
           },
-          loading: () => const Text('CV Genius'),
-          error: (error, stack) => const Text('CV Genius'),
+          loading: () =>  Text(AppLocalizations.of(context)!.genius),
+          error: (error, stack) =>  Text(AppLocalizations.of(context)!.genius)
         ),
         actions: [
           IconButton(

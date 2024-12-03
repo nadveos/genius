@@ -15,6 +15,7 @@ class WelcomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
+
                 duration: const Duration(seconds: 5),
                 alignment: Alignment.center,
                 curve: Curves.easeInCirc,
@@ -33,16 +34,20 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(AppLocalizations.of(context)!.bienvenido,
+                      Text(
+                      semanticsLabel: AppLocalizations.of(context)!.bienvenido,
+                      AppLocalizations.of(context)!.bienvenido,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.headlineMedium),
                       const Divider(),
                       Text(
+                      semanticsLabel: AppLocalizations.of(context)!.bienvenidoMsg,
                         AppLocalizations.of(context)!.bienvenidoMsg,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 10),
                       Text(
+                      semanticsLabel: AppLocalizations.of(context)!.bienvenidoMsg2,
                         AppLocalizations.of(context)!.bienvenidoMsg2,
                         textAlign: TextAlign.center,
                       ),
@@ -54,7 +59,9 @@ class WelcomeScreen extends StatelessWidget {
                 onPressed: () {
                   context.go('/create-cv');
                 },
-                child:  Text(AppLocalizations.of(context)!.empesemos)),
+                child:  Text(
+                semanticsLabel: AppLocalizations.of(context)!.empesemos,
+                AppLocalizations.of(context)!.empesemos)),
           ],
         ),
       ),
