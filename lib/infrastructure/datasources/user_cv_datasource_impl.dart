@@ -24,7 +24,7 @@ class UserCvDataSourceImpl extends UserCvRepository {
           ExperienceSchema,
           StudySchema,
           SkillSchema,
-          HighStudySchema
+          HighStudySchema, AvailabilitySchema
         ],
         directory: tempDir.path,
         inspector: true,

@@ -27,6 +27,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _direccionController = TextEditingController();
   final TextEditingController _nationalityController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
 
   //experiencias controllers
   final TextEditingController _empresaController = TextEditingController();
@@ -63,6 +66,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final TextEditingController _conocimientoController = TextEditingController();
   String _nivelController = 'Basico';
   final List<Map<String, String>> _conocimientos = [];
+//availability controllers
+  final List<Map<String, dynamic>> _availabilities = [];
+  String _availController = 'Full Time';
 
   void _guardarCV() async {
     // Crear la instancia de UserCv
@@ -73,6 +79,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       phoneNumber: _telefonoController.text,
       address: _direccionController.text,
       nationality: _nationalityController.text,
+      city: _cityController.text,
+      state: _stateController.text,
+      country: _countryController.text,
       // Puedes completar esto según tus necesidades
     );
 
@@ -112,6 +121,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           ..level = c['nivel'] ??
               '') // Puedes ajustar el nivel aquí según corresponda
         .toList();
+    final availability = _availabilities.map((e) {
+      return Availability()..title = e['avail'] ?? '';
+    }).toList();
 
     final userCvRepository = ref.read(isarUserProvider);
 
@@ -139,11 +151,17 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           await isar.skills.put(skill);
           userCv.skills.add(skill);
         }
+        for (var avail in availability) {
+          print('Guardando disponibilidad: ${avail.title}');
+          await isar.availabilitys.put(avail);
+          userCv.availabilities.add(avail);
+        }
 
         await userCv.experiences.save();
         await userCv.highStudies.save();
         await userCv.studies.save();
         await userCv.skills.save();
+        await userCv.availabilities.save();
       });
 
       print('CV guardado exitosamente');
@@ -162,6 +180,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       _step4(),
       _step5(),
       _step6(),
+      _step7(),
     ];
     bool validateStep(int index) {
       switch (index) {
@@ -181,7 +200,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           return _highEducacion.isNotEmpty || _highEducacion.isEmpty;
         case 6:
           return _conocimientos.isNotEmpty || _conocimientos.isEmpty;
-
+        case 7:
+          return _formKeys[7].currentState!.validate();
         // No requiere validación
         default:
           return false;
@@ -189,11 +209,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
     }
 
     return Scaffold(
-    resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
-        semanticsLabel: AppLocalizations.of(context)!.crearCv,
-        AppLocalizations.of(context)!.crearCv),
+            semanticsLabel: AppLocalizations.of(context)!.crearCv,
+            AppLocalizations.of(context)!.crearCv),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -222,6 +242,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   return const Icon(Icons.school_outlined);
                 case 6:
                   return const Icon(Icons.star_outline_outlined);
+                case 7:
+                  return const Icon(Icons.watch_later_outlined);
                 default:
                   return const Icon(Icons.help_outlined);
               }
@@ -242,8 +264,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                      semanticsLabel: AppLocalizations.of(context)!.cvGuardado,
-                      AppLocalizations.of(context)!.cvGuardado),
+                          semanticsLabel:
+                              AppLocalizations.of(context)!.cvGuardado,
+                          AppLocalizations.of(context)!.cvGuardado),
                     ),
                   );
                   context.go('/'); // Navegar a la pantalla principal
@@ -272,17 +295,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                       TextButton(
                         onPressed: details.onStepCancel,
                         child: Text(
-                        semanticsLabel: AppLocalizations.of(context)!.atras,
-                        AppLocalizations.of(context)!.atras),
+                            semanticsLabel: AppLocalizations.of(context)!.atras,
+                            AppLocalizations.of(context)!.atras),
                       ),
                     ElevatedButton(
                       onPressed: details.onStepContinue,
                       child: Text(
-                      semanticsLabel: isLastStep ? AppLocalizations.of(context)!.guardarCv
-                          : AppLocalizations.of(context)!.continuar,
-                      isLastStep
-                          ? AppLocalizations.of(context)!.guardarCv
-                          : AppLocalizations.of(context)!.continuar),
+                          semanticsLabel: isLastStep
+                              ? AppLocalizations.of(context)!.guardarCv
+                              : AppLocalizations.of(context)!.continuar,
+                          isLastStep
+                              ? AppLocalizations.of(context)!.guardarCv
+                              : AppLocalizations.of(context)!.continuar),
                     ),
                   ],
                 ),
@@ -292,9 +316,56 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         ),
       ),
     );
+  }
 
-
-
+  Step _step7() {
+    return Step(
+      title: const SizedBox.shrink(),
+      content: Form(
+        key: _formKeys[7],
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.disponibilidad,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ToggleButtons(
+                isSelected: [
+                  _availController == 'Full Time',
+                  _availController == 'Part Time'
+                ],
+                onPressed: (int index) {
+                  setState(() {
+                    _availController = index == 0 ? 'Full Time' : 'Part Time';
+                    if (_availabilities.isEmpty) {
+                      _availabilities.add({'avail': _availController});
+                    } else {
+                      _availabilities[0]['avail'] = _availController;
+                    }
+                  });
+                  print(
+                      _availabilities); // Verifica que se está actualizando correctamente
+                },
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(AppLocalizations.of(context)!.fullTime),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(AppLocalizations.of(context)!.partTime),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Step _step6() {
@@ -307,7 +378,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Conocimientos Adicionales, ingrese sus conocimientos adicionales',
+                semanticsLabel:
+                    'Conocimientos Adicionales, ingrese sus conocimientos adicionales',
                 AppLocalizations.of(context)!.conocimientosAdicionales,
                 textAlign: TextAlign.center,
                 style:
@@ -322,7 +394,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _conocimientoController,
                 decoration: InputDecoration(
@@ -401,7 +473,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
+                semanticsLabel:
+                    'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
                 AppLocalizations.of(context)!.estudiosRealizados,
                 textAlign: TextAlign.center,
                 style:
@@ -416,7 +489,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               if (!_terciarioGuardado)
                 TextFormField(
                   controller: _institutioHighController,
@@ -429,7 +502,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _tituloTerciarioController,
                 decoration: InputDecoration(
@@ -547,7 +620,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-              semanticsLabel: 'Estudios Realizados, ingrese sus estudios secundarios',
+                semanticsLabel:
+                    'Estudios Realizados, ingrese sus estudios secundarios',
                 AppLocalizations.of(context)!.estudiosRealizados,
                 textAlign: TextAlign.center,
                 style:
@@ -688,7 +762,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               // Lista de estudios guardados
               for (var edu in _educacion)
                 ExpansionTile(
@@ -717,7 +791,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Experiencia Laboral, ingrese su experiencia laboral',
+                semanticsLabel:
+                    'Experiencia Laboral, ingrese su experiencia laboral',
                 AppLocalizations.of(context)!.experienciaLaboral,
                 textAlign: TextAlign.center,
                 style:
@@ -751,7 +826,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _empresaController,
                 decoration: InputDecoration(
@@ -861,7 +936,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Datos Personales, ingrese su dirección y nacionalidad',
+                semanticsLabel:
+                    'Datos Personales, ingrese su dirección y nacionalidad',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
@@ -873,6 +949,45 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                 decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.nacionalidadEjem,
                     labelText: AppLocalizations.of(context)!.nacionalidad),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _countryController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.paisEjem,
+                    labelText: AppLocalizations.of(context)!.pais),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _stateController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.provinciaEjem,
+                    labelText: AppLocalizations.of(context)!.provincia),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _cityController,
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.ciudadEjem,
+                    labelText: AppLocalizations.of(context)!.ciudad),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.msg1;
@@ -910,7 +1025,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Datos Personales, ingreso de email y telefono',
+                semanticsLabel: 'Datos Personales, ingreso de email y telefono',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
@@ -926,7 +1041,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   final regex = RegExp(
                       r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+(\.[a-zA-Z]+)?$');
 
-                  if (value == null || value.isEmpty || !regex.hasMatch(value)) {
+                  if (value == null ||
+                      value.isEmpty ||
+                      !regex.hasMatch(value)) {
                     return AppLocalizations.of(context)!.msg1;
                   }
                   return null;
@@ -963,7 +1080,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
           child: Column(
             children: [
               Text(
-              semanticsLabel: 'Datos Personales',
+                semanticsLabel: 'Datos Personales',
                 AppLocalizations.of(context)!.datosPersonales,
                 textAlign: TextAlign.center,
                 style:
@@ -971,10 +1088,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
               ),
               const SizedBox(height: 10),
               TextFormField(
-              
                 controller: _nombreController,
                 decoration: InputDecoration(
-                
                     hintText: AppLocalizations.of(context)!.nombreEjem,
                     labelText: AppLocalizations.of(context)!.nombreCompleto),
                 validator: (value) {

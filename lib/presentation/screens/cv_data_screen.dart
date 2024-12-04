@@ -124,7 +124,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     }
   }
 
-   void showLoadingDialog(BuildContext context) {
+  void showLoadingDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -137,8 +137,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(width: 16),
-                Text(AppLocalizations.of(context)!.generandoCv
-                ),
+                Text(AppLocalizations.of(context)!.generandoCv),
               ],
             ),
           ),
@@ -146,7 +145,6 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +209,12 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                   .defaultTextStyle
                                   .copyWith(fontWeight: pw.FontWeight.bold),
                             ),
+                            pw.Text(
+                                '${applocalizations.disponibilidad} ${userCv.availabilities.map((a) => a.title).join(', ')}',
+                                textScaleFactor: 1.5,
+                                style: pw.Theme.of(context)
+                                    .defaultTextStyle
+                                    .copyWith(fontWeight: pw.FontWeight.bold)),
                             pw.Padding(
                               padding: const pw.EdgeInsets.only(top: 10),
                             ),
@@ -226,14 +230,16 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.start,
                                   children: <pw.Widget>[
+                                    pw.Text(userCv.country),
+                                    pw.Text(userCv.city),
                                     pw.Text(userCv.address),
-                                    pw.Text(userCv.nationality),
                                   ],
                                 ),
                                 pw.Column(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.start,
                                   children: <pw.Widget>[
+                                    pw.Text(userCv.nationality),
                                     pw.Text(userCv.email),
                                     pw.Text(userCv.phoneNumber),
                                   ],
@@ -353,8 +359,8 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-        semanticsLabel: AppLocalizations.of(context)!.generarCv,
-        AppLocalizations.of(context)!.generarCv),
+            semanticsLabel: AppLocalizations.of(context)!.generarCv,
+            AppLocalizations.of(context)!.generarCv),
         centerTitle: true,
       ),
       body: FutureBuilder<UserCv?>(
@@ -383,9 +389,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     label: AppLocalizations.of(context)!.imagenDePerfil,
                     container: true,
                     enabled: true,
-
                     child: Container(
-                    
                       width: 150,
                       height: 150,
                       decoration: BoxDecoration(
@@ -410,8 +414,11 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                   children: [
                     Text(
                         '${userCv.name}, ${userCv.age} ${AppLocalizations.of(context)!.anios}'),
+                    Text(userCv.availabilities.map((a) => a.title).join(', ')),
                     Text(userCv.email),
                     Text(userCv.phoneNumber),
+                    Text(userCv.country),
+                    Text(userCv.city),
                     Text(userCv.address),
                   ],
                 ),
@@ -472,8 +479,9 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                 // Conocimientos
                 if (userCv.skills.isNotEmpty)
                   _buildCard(
-                  semantics: Semantics(
-                    label: AppLocalizations.of(context)!.conocimientos,),
+                    semantics: Semantics(
+                      label: AppLocalizations.of(context)!.conocimientos,
+                    ),
                     context,
                     title: AppLocalizations.of(context)!.conocimientos,
                     children: userCv.skills.map((skill) {
@@ -545,27 +553,25 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     try {
                       await generarCarta(userCv);
                       final filePath = await generatePdf(
-                        userCv, selectedTheme, PdfPageFormat.a4, context);
+                          userCv, selectedTheme, PdfPageFormat.a4, context);
                       context.pop(context);
                       final result = await OpenFile.open(filePath);
                       if (result.type != ResultType.done) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.noSePudoAbrirPdf),
-                        ),
-                      );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                AppLocalizations.of(context)!.noSePudoAbrirPdf),
+                          ),
+                        );
                       }
                     } catch (e) {
                       context.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Error: $e'),
-                      ),
+                        SnackBar(
+                          content: Text('Error: $e'),
+                        ),
                       );
                     }
-                    
                   },
                   child: Text(AppLocalizations.of(context)!.generarCv),
                 ),
@@ -578,7 +584,9 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
   }
 
   Widget _buildCard(BuildContext context,
-      {required String title, required List<Widget> children, required Semantics semantics}) {
+      {required String title,
+      required List<Widget> children,
+      required Semantics semantics}) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 4,
