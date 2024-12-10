@@ -88,13 +88,39 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
     final count = await client.countTokens(prompt);
     print(count.totalTokens);
     final response = await client.generateContent(prompt);
+    final generatedText = response.text.toString();
 
-    return response.text.toString();
+// Limpia el texto si incluye partes del prompt
+    final carta = generatedText
+        .replaceAll(RegExp(r'^(.*prompt.*)?', caseSensitive: false), '')
+        .trim();
+
+   
+    return carta;
+    // Imprime la respuesta completa para inspeccionarla
   }
 
   Future<void> generarCarta(UserCv userCv) async {
+    final isar =
+        Isar.getInstance(); // Asegúrate de usar tu instancia configurada
+
+    // Verifica si ya existe una carta
+    if (userCv.coverLetter != null) {
+      _generatedText = userCv.coverLetter; // Usa la carta existente
+      return;
+    }
+
+    // Genera una nueva carta si no existe
     final locale = ref.read(localeProvider);
     final carta = await generarCartaPresentacion(userCv, locale);
+
+    // Actualiza solo el campo coverLetter en Isar
+    await isar!.writeTxn(() async {
+      userCv.coverLetter = carta; // Modifica el campo localmente
+      await isar.userCvs.put(userCv); // Guarda el objeto actualizado
+    });
+
+    // Actualiza la interfaz de usuario
     setState(() {
       _generatedText = carta;
     });
@@ -168,7 +194,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
       final applocalizations = AppLocalizations.of(context);
       final pageTheme = await _myPageTheme(format, selectedTheme);
       // Pasa el índice
-      
+
       pdf.addPage(pw.Page(
           pageTheme: pageTheme,
           build: (pw.Context context) {
@@ -423,7 +449,6 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     Text(userCv.address),
                   ],
                 ),
-                
 
                 // Educación
                 if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)
@@ -450,8 +475,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.w800),
                             ),
-                            subtitle: Text(
-                                '${highStudy.degree} ${highStudy.isGraduated} ? ${AppLocalizations.of(context)!.graduado} : ${AppLocalizations.of(context)!.enCurso}}'),
+                            subtitle: Text(highStudy.degree),
                           )),
                     ],
                   ),

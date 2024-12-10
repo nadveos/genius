@@ -14,17 +14,12 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-
-                duration: const Duration(seconds: 5),
-                alignment: Alignment.center,
-                curve: Curves.easeInCirc,
-                child: Image.asset(
-                  'assets/logo.png',
-                  width: 200,
-                )),
+            Image.asset(
+              'assets/logo.png',
+              height: 200,
+            ),
             Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -32,7 +27,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                       semanticsLabel: AppLocalizations.of(context)!.bienvenido,
@@ -45,7 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                         AppLocalizations.of(context)!.bienvenidoMsg,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       Text(
                       semanticsLabel: AppLocalizations.of(context)!.bienvenidoMsg2,
                         AppLocalizations.of(context)!.bienvenidoMsg2,

@@ -16,7 +16,7 @@ class CreateCvScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   /// The current index of the step in the CV creation process.
-  /// 
+  ///
   /// This variable is used to keep track of the user's progress
   /// through the different steps of creating a CV.
   int _index = 0;
@@ -198,6 +198,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       _step6(),
       _step7(),
     ];
+
     /// Validates the current step in the CV creation process.
     ///
     /// This method checks if the data entered in the current step is valid
@@ -233,11 +234,11 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(
-            semanticsLabel: AppLocalizations.of(context)!.crearCv,
-            AppLocalizations.of(context)!.crearCv),
-      ),
+      // appBar: AppBar(
+      //   // title: Text(
+      //   //     semanticsLabel: AppLocalizations.of(context)!.crearCv,
+      //   //     AppLocalizations.of(context)!.crearCv),
+      // ),
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: ScrollController(),
@@ -251,18 +252,19 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             stepIconBuilder: (stepIndex, stepState) {
               switch (stepIndex) {
                 case 0:
-                  return const Icon(Icons.person_4_outlined);
+                  return const Icon(Icons.person_2_outlined);
                 case 1:
                   return const Icon(
-                    Icons.person_2_outlined,
+                    Icons.email_outlined,
                   );
                 case 2:
-                  return const Icon(Icons.person_3_outlined);
+                  return const Icon(Icons.home_outlined);
                 case 3:
                   return const Icon(Icons.work_history_outlined);
                 case 4:
-                case 5:
                   return const Icon(Icons.school_outlined);
+                case 5:
+                  return const Icon(Icons.safety_check_outlined);
                 case 6:
                   return const Icon(Icons.star_outline_outlined);
                 case 7:
@@ -494,26 +496,19 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         key: _formKeys[5],
         child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (!_terciarioGuardado)
               Text(
                 semanticsLabel:
                     'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
-                AppLocalizations.of(context)!.estudiosRealizados,
+                AppLocalizations.of(context)!.estudiosRealizadosUni,
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              for (var highEducacion in _highEducacion)
-                ExpansionTile(
-                  title: Text(highEducacion['institution']!),
-                  children: [
-                    ListTile(
-                      title: Text(highEducacion['titulo']!),
-                    ),
-                  ],
-                ),
+              
               const SizedBox(height: 10),
-              if (!_terciarioGuardado)
                 TextFormField(
                   controller: _institutioHighController,
                   decoration: InputDecoration(
@@ -577,6 +572,15 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   ),
                 ],
               ),
+              for (var highEducacion in _highEducacion)
+                ExpansionTile(
+                  title: Text(highEducacion['institution']!),
+                  children: [
+                    ListTile(
+                      title: Text(highEducacion['titulo']!),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerLeft,
@@ -616,8 +620,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                           _startHighStudyController.clear();
                           _endHighStudyController.clear();
                           _poseeTituloTerciario = false;
-                          _formKeys[5].currentState!.reset();
                           _terciarioGuardado = true;
+                          _formKeys[5].currentState!.reset();
                         });
                       }
                     },
@@ -640,7 +644,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         key: _formKeys[4],
         child: Center(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 semanticsLabel:
@@ -792,8 +796,18 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   title: Text(edu['institution'] ?? 'Sin institución'),
                   children: [
                     ListTile(
-                        title: Text(
-                            '${AppLocalizations.of(context)!.nivelSec}: ${edu['nivelSecundario']}')),
+                      title: Text(
+                          '${edu['nivelSecundario']}'),
+                      trailing: IconButton(
+                        onPressed: () {
+                          
+                          
+                         
+
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ),
                   ],
                 ),
               // Botón para agregar estudios terciarios o universitarios
@@ -1101,6 +1115,7 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         key: _formKeys[0],
         child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 semanticsLabel: 'Datos Personales',

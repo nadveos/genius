@@ -4,7 +4,6 @@ import 'package:cvgenius/domain/entities/user.dart';
 import 'package:cvgenius/presentation/providers/isar_user_provider.dart';
 import 'package:cvgenius/presentation/screens/screens.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,24 +27,31 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: userCvAsyncValue.when(
-            data: (data) {
-              if (data.isNotEmpty) {
-                return Text(AppLocalizations.of(context)!.misCvs);
-              } else {
-                return Text(AppLocalizations.of(context)!.genius);
-              }
-            },
-            loading: () => Text(AppLocalizations.of(context)!.genius),
-            error: (error, stack) =>
-                Text(AppLocalizations.of(context)!.genius)),
+        backgroundColor: Colors.transparent,
+        // title: userCvAsyncValue.when(
+        //     data: (data) {
+        //       if (data.isNotEmpty) {
+        //         return Text(AppLocalizations.of(context)!.misCvs);
+        //       } else {
+        //         return Text(AppLocalizations.of(context)!.genius);
+        //       }
+        //     },
+        //     loading: () => Text(AppLocalizations.of(context)!.genius),
+        //     error: (error, stack) =>
+        //         Text(AppLocalizations.of(context)!.genius)),
         actions: [
           IconButton(
             onPressed: changeTheme,
             // ignore: unrelated_type_equality_checks
             icon: ref.watch(themeProvider)
-                ? const Icon(Icons.dark_mode)
-                : const Icon(Icons.light_mode),
+                ? const Icon(
+                    Icons.dark_mode,
+                    color: Colors.blue,
+                  )
+                : const Icon(
+                    Icons.light_mode,
+                    color: Colors.blue,
+                  ),
           )
           // ),
           // Builder(
@@ -81,9 +87,26 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                 const Text(
                     'Mira 5 anuncios para desbloquear la creación de otro CV'),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(context: context, builder: (context) => const AlertDialog(
+                    
+                    content: DecoratedBox(decoration: BoxDecoration(color: Colors.black54), child: Text('Ver anuncio'),),
+                    ),);
+                  },
                   child: const Text('Ver anuncio'),
-                )
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      color: Colors.grey[300]),
+                  child: const SizedBox(
+                    height: 80,
+                    width: double.infinity,
+                    child: Center(
+                      child: Text('Anuncio'),
+                    ),
+                  ),
+                ),
               ],
             );
           }
@@ -93,8 +116,6 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
-   
 
   ListView _mycvs(List<UserCv> cvList) {
     return ListView.builder(

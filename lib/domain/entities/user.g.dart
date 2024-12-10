@@ -37,38 +37,43 @@ const UserCvSchema = CollectionSchema(
       name: r'country',
       type: IsarType.string,
     ),
-    r'email': PropertySchema(
+    r'coverLetter': PropertySchema(
       id: 4,
+      name: r'coverLetter',
+      type: IsarType.string,
+    ),
+    r'email': PropertySchema(
+      id: 5,
       name: r'email',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'nationality': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'nationality',
       type: IsarType.string,
     ),
     r'phoneNumber': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'phoneNumber',
       type: IsarType.string,
     ),
     r'slotsUnlocked': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'slotsUnlocked',
       type: IsarType.long,
     ),
     r'state': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'state',
       type: IsarType.string,
     ),
     r'totalAdsWatched': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'totalAdsWatched',
       type: IsarType.long,
     )
@@ -128,6 +133,12 @@ int _userCvEstimateSize(
   bytesCount += 3 + object.age.length * 3;
   bytesCount += 3 + object.city.length * 3;
   bytesCount += 3 + object.country.length * 3;
+  {
+    final value = object.coverLetter;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.email.length * 3;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.nationality.length * 3;
@@ -146,13 +157,14 @@ void _userCvSerialize(
   writer.writeString(offsets[1], object.age);
   writer.writeString(offsets[2], object.city);
   writer.writeString(offsets[3], object.country);
-  writer.writeString(offsets[4], object.email);
-  writer.writeString(offsets[5], object.name);
-  writer.writeString(offsets[6], object.nationality);
-  writer.writeString(offsets[7], object.phoneNumber);
-  writer.writeLong(offsets[8], object.slotsUnlocked);
-  writer.writeString(offsets[9], object.state);
-  writer.writeLong(offsets[10], object.totalAdsWatched);
+  writer.writeString(offsets[4], object.coverLetter);
+  writer.writeString(offsets[5], object.email);
+  writer.writeString(offsets[6], object.name);
+  writer.writeString(offsets[7], object.nationality);
+  writer.writeString(offsets[8], object.phoneNumber);
+  writer.writeLong(offsets[9], object.slotsUnlocked);
+  writer.writeString(offsets[10], object.state);
+  writer.writeLong(offsets[11], object.totalAdsWatched);
 }
 
 UserCv _userCvDeserialize(
@@ -166,13 +178,14 @@ UserCv _userCvDeserialize(
     age: reader.readString(offsets[1]),
     city: reader.readString(offsets[2]),
     country: reader.readString(offsets[3]),
-    email: reader.readString(offsets[4]),
-    name: reader.readString(offsets[5]),
-    nationality: reader.readString(offsets[6]),
-    phoneNumber: reader.readString(offsets[7]),
-    slotsUnlocked: reader.readLongOrNull(offsets[8]) ?? 1,
-    state: reader.readString(offsets[9]),
-    totalAdsWatched: reader.readLongOrNull(offsets[10]) ?? 0,
+    coverLetter: reader.readStringOrNull(offsets[4]),
+    email: reader.readString(offsets[5]),
+    name: reader.readString(offsets[6]),
+    nationality: reader.readString(offsets[7]),
+    phoneNumber: reader.readString(offsets[8]),
+    slotsUnlocked: reader.readLongOrNull(offsets[9]) ?? 1,
+    state: reader.readString(offsets[10]),
+    totalAdsWatched: reader.readLongOrNull(offsets[11]) ?? 0,
   );
   object.id = id;
   return object;
@@ -194,7 +207,7 @@ P _userCvDeserializeProp<P>(
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
@@ -202,10 +215,12 @@ P _userCvDeserializeProp<P>(
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readLongOrNull(offset) ?? 1) as P;
-    case 9:
       return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readLongOrNull(offset) ?? 1) as P;
     case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
       return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -826,6 +841,152 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'country',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'coverLetter',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'coverLetter',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'coverLetter',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'coverLetter',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'coverLetter',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'coverLetter',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> coverLetterIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'coverLetter',
         value: '',
       ));
     });
@@ -1979,6 +2140,18 @@ extension UserCvQuerySortBy on QueryBuilder<UserCv, UserCv, QSortBy> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByCoverLetter() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverLetter', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByCoverLetterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverLetter', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByEmail() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'email', Sort.asc);
@@ -2113,6 +2286,18 @@ extension UserCvQuerySortThenBy on QueryBuilder<UserCv, UserCv, QSortThenBy> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByCoverLetter() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverLetter', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByCoverLetterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverLetter', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByEmail() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'email', Sort.asc);
@@ -2239,6 +2424,13 @@ extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QDistinct> distinctByCoverLetter(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'coverLetter', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QDistinct> distinctByEmail(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2315,6 +2507,12 @@ extension UserCvQueryProperty on QueryBuilder<UserCv, UserCv, QQueryProperty> {
   QueryBuilder<UserCv, String, QQueryOperations> countryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'country');
+    });
+  }
+
+  QueryBuilder<UserCv, String?, QQueryOperations> coverLetterProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'coverLetter');
     });
   }
 
