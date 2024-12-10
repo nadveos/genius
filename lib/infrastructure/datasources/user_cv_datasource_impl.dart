@@ -12,7 +12,6 @@ class UserCvDataSourceImpl extends UserCvRepository {
 
   UserCvDataSourceImpl() {
     db = openIsar();
-    
   }
 
   Future<Isar> openIsar() async {
@@ -24,7 +23,8 @@ class UserCvDataSourceImpl extends UserCvRepository {
           ExperienceSchema,
           StudySchema,
           SkillSchema,
-          HighStudySchema, AvailabilitySchema
+          HighStudySchema,
+          AvailabilitySchema
         ],
         directory: tempDir.path,
         inspector: true,
@@ -33,53 +33,51 @@ class UserCvDataSourceImpl extends UserCvRepository {
     return Future.value(Isar.getInstance());
   }
 
- @override
-Future<void> deleteCv(Id id) async {
-  try {
-    final isar = await db;
-    final userCv = await isar.userCvs.get(id);
-    if (userCv != null) {
-      await isar.writeTxn(() async {
-        // Manejo seguro para relaciones
-        if ( userCv.skills.isLoaded) {
-          for (final skill in userCv.skills) {
-            await isar.skills.delete(skill.id);
+  @override
+  Future<void> deleteCv(Id id) async {
+    try {
+      final isar = await db;
+      final userCv = await isar.userCvs.get(id);
+      if (userCv != null) {
+        await isar.writeTxn(() async {
+          // Manejo seguro para relaciones
+          if (userCv.skills.isLoaded) {
+            for (final skill in userCv.skills) {
+              await isar.skills.delete(skill.id);
+            }
           }
-        }
-        userCv.skills.clear();
+          userCv.skills.clear();
 
-        if ( userCv.studies.isLoaded) {
-          for (final study in userCv.studies) {
-            await isar.studys.delete(study.id);
+          if (userCv.studies.isLoaded) {
+            for (final study in userCv.studies) {
+              await isar.studys.delete(study.id);
+            }
           }
-        }
-        userCv.studies.clear();
+          userCv.studies.clear();
 
-        if ( userCv.experiences.isLoaded) {
-          for (final experience in userCv.experiences) {
-            await isar.experiences.delete(experience.id);
+          if (userCv.experiences.isLoaded) {
+            for (final experience in userCv.experiences) {
+              await isar.experiences.delete(experience.id);
+            }
           }
-        }
-        userCv.experiences.clear();
+          userCv.experiences.clear();
 
-        if ( userCv.highStudies.isLoaded) {
-          for (final highStudy in userCv.highStudies) {
-            await isar.highStudys.delete(highStudy.id);
+          if (userCv.highStudies.isLoaded) {
+            for (final highStudy in userCv.highStudies) {
+              await isar.highStudys.delete(highStudy.id);
+            }
           }
-        }
-        userCv.highStudies.clear();
+          userCv.highStudies.clear();
 
-        // Eliminar el UserCv
-        await isar.userCvs.delete(id);
-      });
+          // Eliminar el UserCv
+          await isar.userCvs.delete(id);
+        });
+      }
+    } catch (e) {
+      print('Error deleting CV with ID $id: $e');
+      throw Exception('Failed to delete CV');
     }
-  } catch (e) {
-    print('Error deleting CV with ID $id: $e');
-    throw Exception('Failed to delete CV');
   }
-}
-
-
 
   @override
   Future<UserCv> getUserCv(Id id) async {
@@ -92,32 +90,85 @@ Future<void> deleteCv(Id id) async {
   }
 
   @override
-Future<void> saveUserCv(UserCv userCv) async {
-  try {
-    final isar = await db;
-    await isar.writeTxn(() async {
-      await isar.userCvs.put(userCv);
-      await userCv.experiences.save();
-      await userCv.studies.save();
-      await userCv.skills.save();
-      await userCv.highStudies.save();
-    });
-  } catch (e) {
-    print('Error saving UserCv: $e');
-    throw Exception('Failed to save UserCv');
+  Future<void> saveUserCv(UserCv userCv) async {
+    try {
+      final isar = await db;
+      await isar.writeTxn(() async {
+        await isar.userCvs.put(userCv);
+        await userCv.experiences.save();
+        await userCv.studies.save();
+        await userCv.skills.save();
+        await userCv.highStudies.save();
+      });
+    } catch (e) {
+      print('Error saving UserCv: $e');
+      throw Exception('Failed to save UserCv');
+    }
   }
-}
 
-
- @override
-Stream<List<UserCv>> getAllCvs() async* {
-  try {
-    final isar = await db;
-    yield* isar.userCvs.where().watch(fireImmediately: true);
-  } catch (e) {
-    print('Error fetching all CVs: $e');
-    yield []; // Devuelve una lista vacía en caso de error
+  @override
+  Stream<List<UserCv>> getAllCvs() async* {
+    try {
+      final isar = await db;
+      yield* isar.userCvs.where().watch(fireImmediately: true);
+    } catch (e) {
+      print('Error fetching all CVs: $e');
+      yield []; // Devuelve una lista vacía en caso de error
+    }
   }
-}
 
+  @override
+  Future<void> incrementSlot(Id id) async {
+    try {
+      final isar = await db;
+
+      await isar.writeTxn(() async {
+        // Obtiene el registro del usuario por su ID
+        final userCv = await isar.userCvs.get(id);
+
+        if (userCv != null) {
+          // Incrementa el slot desbloqueado
+          userCv.slotsUnlocked += 1;
+
+          // Guarda los cambios en la base de datos
+          await isar.userCvs.put(userCv);
+        } else {
+          throw Exception("User not found for ID: $id");
+        }
+      });
+    } catch (e) {
+      print('Error incrementing slot for user with ID $id: $e');
+      throw Exception('Failed to increment slot');
+    }
+  }
+
+  @override
+  Future<void> decrementSlot(Id id) async {
+    try {
+      final isar = await db;
+
+      await isar.writeTxn(() async {
+        // Obtiene el registro del usuario por su ID
+        final userCv = await isar.userCvs.get(id);
+
+        if (userCv != null) {
+          // Verifica que no reduzca por debajo de 0
+          if (userCv.slotsUnlocked > 0) {
+            userCv.slotsUnlocked -= 1;
+
+            // Guarda los cambios en la base de datos
+            await isar.userCvs.put(userCv);
+          } else {
+            throw Exception(
+                "Cannot decrement slots below 0 for user with ID: $id");
+          }
+        } else {
+          throw Exception("User not found for ID: $id");
+        }
+      });
+    } catch (e) {
+      print('Error decrementing slot for user with ID $id: $e');
+      throw Exception('Failed to decrement slot');
+    }
+  }
 }

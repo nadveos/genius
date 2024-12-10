@@ -29,16 +29,16 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: userCvAsyncValue.when(
-          data: (data) {
-            if (data.isNotEmpty) {
-              return Text(AppLocalizations.of(context)!.misCvs);
-            } else {
-              return  Text(AppLocalizations.of(context)!.genius);
-            }
-          },
-          loading: () =>  Text(AppLocalizations.of(context)!.genius),
-          error: (error, stack) =>  Text(AppLocalizations.of(context)!.genius)
-        ),
+            data: (data) {
+              if (data.isNotEmpty) {
+                return Text(AppLocalizations.of(context)!.misCvs);
+              } else {
+                return Text(AppLocalizations.of(context)!.genius);
+              }
+            },
+            loading: () => Text(AppLocalizations.of(context)!.genius),
+            error: (error, stack) =>
+                Text(AppLocalizations.of(context)!.genius)),
         actions: [
           IconButton(
             onPressed: changeTheme,
@@ -46,27 +46,28 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             icon: ref.watch(themeProvider)
                 ? const Icon(Icons.dark_mode)
                 : const Icon(Icons.light_mode),
-          ),
-          Builder(
-            builder: (context) {
-              return userCvAsyncValue.when(
-                data: (data) {
-                  if (data.isNotEmpty) {
-                    return IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        context.push('/create-cv');
-                      },
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (error, stack) => const SizedBox.shrink(),
-              );
-            },
-          ),
+          )
+          // ),
+          // Builder(
+          //   builder: (context) {
+          //     return userCvAsyncValue.when(
+          //       data: (data) {
+          //         if (data.isNotEmpty) {
+          //           return IconButton(
+          //             icon: const Icon(Icons.add),
+          //             onPressed: () {
+          //               context.push('/create-cv');
+          //             },
+          //           );
+          //         } else {
+          //           return const SizedBox.shrink();
+          //         }
+          //       },
+          //       loading: () => const SizedBox.shrink(),
+          //       error: (error, stack) => const SizedBox.shrink(),
+          //     );
+          //   },
+          // ),
         ],
       ),
       body: userCvAsyncValue.when(
@@ -74,7 +75,17 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
           if (cvList.isEmpty) {
             return const WelcomeScreen();
           } else {
-            return _mycvs(cvList);
+            return Column(
+              children: [
+                Expanded(child: _mycvs(cvList)),
+                const Text(
+                    'Mira 5 anuncios para desbloquear la creación de otro CV'),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Ver anuncio'),
+                )
+              ],
+            );
           }
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -82,6 +93,8 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
+   
 
   ListView _mycvs(List<UserCv> cvList) {
     return ListView.builder(
@@ -94,22 +107,14 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
           leading: CircleAvatar(
             child: Text(cvList[index].name[0].toUpperCase()),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.remove_red_eye, color: Colors.green,),
-                onPressed: () {
-                  context.push('/cv-data/${cvList[index].id}');
-                },
-              ),
-              IconButton(
-                onPressed: () {
-                  ref.read(isarUserProvider).deleteCv(cvList[index].id);
-                },
-                icon: const Icon(Icons.delete, color: Colors.red,),
-              ),
-            ],
+          trailing: IconButton(
+            icon: const Icon(
+              Icons.remove_red_eye,
+              color: Colors.green,
+            ),
+            onPressed: () {
+              context.push('/cv-data/${cvList[index].id}');
+            },
           ),
         );
       },

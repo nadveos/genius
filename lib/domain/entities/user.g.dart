@@ -57,10 +57,20 @@ const UserCvSchema = CollectionSchema(
       name: r'phoneNumber',
       type: IsarType.string,
     ),
-    r'state': PropertySchema(
+    r'slotsUnlocked': PropertySchema(
       id: 8,
+      name: r'slotsUnlocked',
+      type: IsarType.long,
+    ),
+    r'state': PropertySchema(
+      id: 9,
       name: r'state',
       type: IsarType.string,
+    ),
+    r'totalAdsWatched': PropertySchema(
+      id: 10,
+      name: r'totalAdsWatched',
+      type: IsarType.long,
     )
   },
   estimateSize: _userCvEstimateSize,
@@ -140,7 +150,9 @@ void _userCvSerialize(
   writer.writeString(offsets[5], object.name);
   writer.writeString(offsets[6], object.nationality);
   writer.writeString(offsets[7], object.phoneNumber);
-  writer.writeString(offsets[8], object.state);
+  writer.writeLong(offsets[8], object.slotsUnlocked);
+  writer.writeString(offsets[9], object.state);
+  writer.writeLong(offsets[10], object.totalAdsWatched);
 }
 
 UserCv _userCvDeserialize(
@@ -158,7 +170,9 @@ UserCv _userCvDeserialize(
     name: reader.readString(offsets[5]),
     nationality: reader.readString(offsets[6]),
     phoneNumber: reader.readString(offsets[7]),
-    state: reader.readString(offsets[8]),
+    slotsUnlocked: reader.readLongOrNull(offsets[8]) ?? 1,
+    state: reader.readString(offsets[9]),
+    totalAdsWatched: reader.readLongOrNull(offsets[10]) ?? 0,
   );
   object.id = id;
   return object;
@@ -188,7 +202,11 @@ P _userCvDeserializeProp<P>(
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readLongOrNull(offset) ?? 1) as P;
+    case 9:
       return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1384,6 +1402,59 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> slotsUnlockedEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'slotsUnlocked',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> slotsUnlockedGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'slotsUnlocked',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> slotsUnlockedLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'slotsUnlocked',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> slotsUnlockedBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'slotsUnlocked',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterFilterCondition> stateEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1510,6 +1581,60 @@ extension UserCvQueryFilter on QueryBuilder<UserCv, UserCv, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'state',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> totalAdsWatchedEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalAdsWatched',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition>
+      totalAdsWatchedGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalAdsWatched',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> totalAdsWatchedLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalAdsWatched',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterFilterCondition> totalAdsWatchedBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalAdsWatched',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1902,6 +2027,18 @@ extension UserCvQuerySortBy on QueryBuilder<UserCv, UserCv, QSortBy> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortBySlotsUnlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slotsUnlocked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortBySlotsUnlockedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slotsUnlocked', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByState() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'state', Sort.asc);
@@ -1911,6 +2048,18 @@ extension UserCvQuerySortBy on QueryBuilder<UserCv, UserCv, QSortBy> {
   QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByStateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'state', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByTotalAdsWatched() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAdsWatched', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> sortByTotalAdsWatchedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAdsWatched', Sort.desc);
     });
   }
 }
@@ -2024,6 +2173,18 @@ extension UserCvQuerySortThenBy on QueryBuilder<UserCv, UserCv, QSortThenBy> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenBySlotsUnlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slotsUnlocked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenBySlotsUnlockedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slotsUnlocked', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByState() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'state', Sort.asc);
@@ -2033,6 +2194,18 @@ extension UserCvQuerySortThenBy on QueryBuilder<UserCv, UserCv, QSortThenBy> {
   QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByStateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'state', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByTotalAdsWatched() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAdsWatched', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QAfterSortBy> thenByTotalAdsWatchedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalAdsWatched', Sort.desc);
     });
   }
 }
@@ -2094,10 +2267,22 @@ extension UserCvQueryWhereDistinct on QueryBuilder<UserCv, UserCv, QDistinct> {
     });
   }
 
+  QueryBuilder<UserCv, UserCv, QDistinct> distinctBySlotsUnlocked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'slotsUnlocked');
+    });
+  }
+
   QueryBuilder<UserCv, UserCv, QDistinct> distinctByState(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'state', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<UserCv, UserCv, QDistinct> distinctByTotalAdsWatched() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalAdsWatched');
     });
   }
 }
@@ -2157,9 +2342,21 @@ extension UserCvQueryProperty on QueryBuilder<UserCv, UserCv, QQueryProperty> {
     });
   }
 
+  QueryBuilder<UserCv, int, QQueryOperations> slotsUnlockedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'slotsUnlocked');
+    });
+  }
+
   QueryBuilder<UserCv, String, QQueryOperations> stateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'state');
+    });
+  }
+
+  QueryBuilder<UserCv, int, QQueryOperations> totalAdsWatchedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalAdsWatched');
     });
   }
 }

@@ -7,4 +7,6 @@ abstract class UserCvRepository {
   Stream<List<UserCv?>> getAllCvs();
   Future<void> saveUserCv(UserCv userCv);
   Future <void> deleteCv(Id id);
+  Future <void> decrementSlot(Id id);
+  Future <void> incrementSlot(Id id);
 }

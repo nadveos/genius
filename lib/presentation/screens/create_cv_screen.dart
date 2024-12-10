@@ -15,6 +15,10 @@ class CreateCvScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<CreateCvScreen> {
+  /// The current index of the step in the CV creation process.
+  /// 
+  /// This variable is used to keep track of the user's progress
+  /// through the different steps of creating a CV.
   int _index = 0;
 
   final _formKeys =
@@ -70,6 +74,16 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
   final List<Map<String, dynamic>> _availabilities = [];
   String _availController = 'Full Time';
 
+  /// Saves the CV asynchronously.
+  ///
+  /// This method performs the necessary operations to save the current CV.
+  /// It may involve file I/O, database operations, or other asynchronous tasks.
+  /// Ensure that any required data is available before calling this method.
+  ///
+  /// Usage:
+  /// ```dart
+  /// _guardarCV();
+  /// ```
   void _guardarCV() async {
     // Crear la instancia de UserCv
     final userCv = UserCv(
@@ -172,6 +186,8 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /// A list of steps used in the create CV screen.
+    /// Each step represents a part of the CV creation process.
     List<Step> steps = [
       _step0(),
       _step1(),
@@ -182,6 +198,13 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
       _step6(),
       _step7(),
     ];
+    /// Validates the current step in the CV creation process.
+    ///
+    /// This method checks if the data entered in the current step is valid
+    /// based on the given index.
+    ///
+    /// - Parameter index: The index of the step to validate.
+    /// - Returns: A boolean value indicating whether the step is valid.
     bool validateStep(int index) {
       switch (index) {
         case 0:

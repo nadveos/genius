@@ -14,6 +14,8 @@ class UserCv {
   final String state;
   final String country;
   final String nationality;
+  int totalAdsWatched = 0; // Anuncios totales vistos.
+  int slotsUnlocked = 1;  // Slots desbloqueados actualmente.
   final IsarLinks<Availability> availabilities = IsarLinks<Availability>();
   final IsarLinks<Experience> experiences = IsarLinks<Experience>();
   final IsarLinks<Study> studies = IsarLinks<Study>();
@@ -29,9 +31,13 @@ class UserCv {
       required this.nationality,
       required this.city,
       required this.state,
-      required this.country
+      required this.country,
+      this.totalAdsWatched = 0,
+      this.slotsUnlocked = 1
+      
       });
 }
+
 
 @collection
 class Availability {
@@ -76,3 +82,4 @@ class Skill {
   late String name;
   late String level;
 }
+

@@ -168,6 +168,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
       final applocalizations = AppLocalizations.of(context);
       final pageTheme = await _myPageTheme(format, selectedTheme);
       // Pasa el índice
+      
       pdf.addPage(pw.Page(
           pageTheme: pageTheme,
           build: (pw.Context context) {
@@ -422,6 +423,7 @@ class _CvDataScreenState extends ConsumerState<CvDataScreen> {
                     Text(userCv.address),
                   ],
                 ),
+                
 
                 // Educación
                 if (userCv.highStudies.isNotEmpty || userCv.studies.isNotEmpty)

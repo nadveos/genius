@@ -16,14 +16,24 @@ class UserCvRepositoryImpl extends UserCvRepository {
   Future<void> saveUserCv(UserCv userCv) {
     return datasource.saveUserCv(userCv);
   }
-  
+
   @override
   Stream<List<UserCv?>> getAllCvs() {
     return datasource.getAllCvs();
   }
-  
+
   @override
   Future<void> deleteCv(Id id) {
-   return datasource.deleteCv(id);
+    return datasource.deleteCv(id);
+  }
+
+  @override
+  Future<void> decrementSlot(Id id) {
+    return datasource.decrementSlot(id);
+  }
+
+  @override
+  Future<void> incrementSlot(Id id) {
+    return datasource.incrementSlot(id);
   }
 }
