@@ -176,6 +176,10 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
         await userCv.studies.save();
         await userCv.skills.save();
         await userCv.availabilities.save();
+        // Combine decrementSlots logic here
+        // Decrementar los slots después de guardar el CV
+        //final currentUserCv = await isar.userCvs.get(userCv.id);
+        //
       });
 
       print('CV guardado exitosamente');
@@ -499,27 +503,26 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (!_terciarioGuardado)
-              Text(
-                semanticsLabel:
-                    'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
-                AppLocalizations.of(context)!.estudiosRealizadosUni,
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              
-              const SizedBox(height: 10),
-                TextFormField(
-                  controller: _institutioHighController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.instiUni),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.msg1;
-                    }
-                    return null;
-                  },
+                Text(
+                  semanticsLabel:
+                      'Estudios Realizados, ingrese sus estudios terciarios o universitarios',
+                  AppLocalizations.of(context)!.estudiosRealizadosUni,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _institutioHighController,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.instiUni),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.msg1;
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _tituloTerciarioController,
@@ -796,15 +799,9 @@ class _HomeScreenState extends ConsumerState<CreateCvScreen> {
                   title: Text(edu['institution'] ?? 'Sin institución'),
                   children: [
                     ListTile(
-                      title: Text(
-                          '${edu['nivelSecundario']}'),
+                      title: Text('${edu['nivelSecundario']}'),
                       trailing: IconButton(
-                        onPressed: () {
-                          
-                          
-                         
-
-                        },
+                        onPressed: () {},
                         icon: const Icon(Icons.delete),
                       ),
                     ),

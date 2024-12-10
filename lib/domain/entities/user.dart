@@ -15,27 +15,37 @@ class UserCv {
   final String country;
   final String nationality;
   String? coverLetter;
-  int totalAdsWatched = 0; // Anuncios totales vistos.
-  int slotsUnlocked = 1; // Slots desbloqueados actualmente.
+  
+  final IsarLink<UserGlobal> userGlobal = IsarLink<UserGlobal>();
+
   final IsarLinks<Availability> availabilities = IsarLinks<Availability>();
   final IsarLinks<Experience> experiences = IsarLinks<Experience>();
   final IsarLinks<Study> studies = IsarLinks<Study>();
   final IsarLinks<Skill> skills = IsarLinks<Skill>();
   final IsarLinks<HighStudy> highStudies = IsarLinks<HighStudy>();
 
-  UserCv(
-      {required this.name,
-      required this.email,
-      required this.phoneNumber,
-      required this.address,
-      required this.age,
-      required this.nationality,
-      required this.city,
-      required this.state,
-      required this.country,
-      this.coverLetter,
-      this.totalAdsWatched = 0,
-      this.slotsUnlocked = 1});
+  
+
+  UserCv({
+    required this.name,
+    required this.email,
+    required this.phoneNumber,
+    required this.address,
+    required this.age,
+    required this.nationality,
+    required this.city,
+    required this.state,
+    required this.country,
+    this.coverLetter,
+  });
+}
+
+@collection
+class UserGlobal {
+  Id id = Isar.autoIncrement;
+  int slotsUnlocked = 1;
+  int totalAdsWatched = 0;
+  
 }
 
 @collection

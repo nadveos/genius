@@ -28,12 +28,14 @@ class UserCvRepositoryImpl extends UserCvRepository {
   }
 
   @override
-  Future<void> decrementSlot(Id id) {
-    return datasource.decrementSlot(id);
+  Future<void> decrementSlots(Id id) {
+    return datasource.decrementSlots(id);
   }
 
   @override
-  Future<void> incrementSlot(Id id) {
-    return datasource.incrementSlot(id);
+  Future<void> incrementSlotAndWatchedAds(Id id) {
+    return datasource.incrementSlotAndWatchedAds(id);
   }
+  
+
 }

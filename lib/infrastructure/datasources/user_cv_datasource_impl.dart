@@ -24,7 +24,8 @@ class UserCvDataSourceImpl extends UserCvRepository {
           StudySchema,
           SkillSchema,
           HighStudySchema,
-          AvailabilitySchema
+          AvailabilitySchema,
+          UserCvSchema
         ],
         directory: tempDir.path,
         inspector: true,
@@ -118,57 +119,39 @@ class UserCvDataSourceImpl extends UserCvRepository {
   }
 
   @override
-  Future<void> incrementSlot(Id id) async {
+  Future<void> decrementSlots(Id id) async {
     try {
       final isar = await db;
-
       await isar.writeTxn(() async {
-        // Obtiene el registro del usuario por su ID
         final userCv = await isar.userCvs.get(id);
-
-        if (userCv != null) {
-          // Incrementa el slot desbloqueado
-          userCv.slotsUnlocked += 1;
-
-          // Guarda los cambios en la base de datos
-          await isar.userCvs.put(userCv);
-        } else {
-          throw Exception("User not found for ID: $id");
+        if (userCv == null) {
+          throw Exception('UserCv not found for ID $id');
         }
+        userCv.userGlobal.save();
       });
     } catch (e) {
-      print('Error incrementing slot for user with ID $id: $e');
-      throw Exception('Failed to increment slot');
+      print('Error decrementing slots for UserCv ID $id: $e');
+      throw Exception('Failed to decrement slots');
     }
   }
 
   @override
-  Future<void> decrementSlot(Id id) async {
+  Future<void> incrementSlotAndWatchedAds(Id id) async {
     try {
       final isar = await db;
-
       await isar.writeTxn(() async {
-        // Obtiene el registro del usuario por su ID
         final userCv = await isar.userCvs.get(id);
-
-        if (userCv != null) {
-          // Verifica que no reduzca por debajo de 0
-          if (userCv.slotsUnlocked > 0) {
-            userCv.slotsUnlocked -= 1;
-
-            // Guarda los cambios en la base de datos
-            await isar.userCvs.put(userCv);
-          } else {
-            throw Exception(
-                "Cannot decrement slots below 0 for user with ID: $id");
-          }
-        } else {
-          throw Exception("User not found for ID: $id");
+        if (userCv == null) {
+          throw Exception('UserCv not found for ID $id');
         }
+        await userCv.userGlobal.load();
+        // Incrementar anunciosmirados
+
+        // Incrementar Slots si mira un anuncio
       });
     } catch (e) {
-      print('Error decrementing slot for user with ID $id: $e');
-      throw Exception('Failed to decrement slot');
+      print('Error incrementing slots and watched ads for UserCv ID $id: $e');
+      throw Exception('Failed to increment slots and watched ads');
     }
   }
 }

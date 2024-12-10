@@ -25,6 +25,36 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(themeProvider.notifier).toggleTheme();
     }
 
+    // Función para manejar la visualización de anuncios y aumentar los slots
+    Future<void> mostrarAnuncio(
+      UserCv userCv,
+      WidgetRef ref,
+    ) async {
+      try {
+        // Simulación de la espera del anuncio
+        await Future.delayed(const Duration(seconds: 3));
+
+        // Validar si el usuario existe
+        final userCv = ref.read(isarRealUserProvider).value?.first;
+        if (userCv == null) {
+          throw Exception('No se encontró un UserCv válido');
+        }
+
+        // Incrementar slots desbloqueados y anuncios vistos en una única transacción
+        final userCvRepository = ref.read(isarUserProvider);
+        final isar = await userCvRepository.db;
+
+        await isar.writeTxn(() async {
+          // Incrementar slots luego de mirar el anuncio
+          
+        });
+
+        print('Anuncio mostrado y datos actualizados exitosamente');
+      } catch (e) {
+        print('Error al mostrar anuncio: $e');
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -52,28 +82,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                     Icons.light_mode,
                     color: Colors.blue,
                   ),
-          )
-          // ),
-          // Builder(
-          //   builder: (context) {
-          //     return userCvAsyncValue.when(
-          //       data: (data) {
-          //         if (data.isNotEmpty) {
-          //           return IconButton(
-          //             icon: const Icon(Icons.add),
-          //             onPressed: () {
-          //               context.push('/create-cv');
-          //             },
-          //           );
-          //         } else {
-          //           return const SizedBox.shrink();
-          //         }
-          //       },
-          //       loading: () => const SizedBox.shrink(),
-          //       error: (error, stack) => const SizedBox.shrink(),
-          //     );
-          //   },
-          // ),
+          ),
         ],
       ),
       body: userCvAsyncValue.when(
@@ -84,17 +93,25 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             return Column(
               children: [
                 Expanded(child: _mycvs(cvList)),
+                // Mostrar los slots disponibles dinámicamente y manejar la navegación
+                
+
+// Mostrar texto sobre anuncios
                 const Text(
-                    'Mira 5 anuncios para desbloquear la creación de otro CV'),
+                  'Mira 1 anuncio para desbloquear la creación de otro CV',
+                ),
+
+// Botón para mostrar anuncio
                 ElevatedButton(
-                  onPressed: () {
-                    showDialog(context: context, builder: (context) => const AlertDialog(
-                    
-                    content: DecoratedBox(decoration: BoxDecoration(color: Colors.black54), child: Text('Ver anuncio'),),
-                    ),);
-                  },
+                  onPressed: cvList.isNotEmpty
+                      ? () async {
+                          final userCv = cvList.first;
+                          await mostrarAnuncio(userCv, ref);
+                        }
+                      : null, // Desactiva el botón si no hay usuarios en la lista
                   child: const Text('Ver anuncio'),
                 ),
+
                 DecoratedBox(
                   decoration: BoxDecoration(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
